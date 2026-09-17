@@ -155,7 +155,6 @@ D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\scopedcss\Views\Shared\_La
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\scopedcss\bundle\WeddingManagementSystem.styles.css
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\scopedcss\projectbundle\WeddingManagementSystem.bundle.scp.css
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\compressed\y05c3erbmu-{0}-61n19gt1b8-61n19gt1b8.gz
-D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\compressed\xzwt0t6xto-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\compressed\zf363as582-{0}-bqjiyaj88i-bqjiyaj88i.gz
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\compressed\w3o89wpip7-{0}-c2jlpeoesf-c2jlpeoesf.gz
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\compressed\22ccfhl0gf-{0}-erw9l3u2r3-erw9l3u2r3.gz
@@ -228,4 +227,6 @@ D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\refint\WeddingManagementSy
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\WeddingManagementSystem.pdb
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\WeddingManagementSystem.genruntimeconfig.cache
 D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\ref\WeddingManagementSystem.dll
-D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\compressed\0mkgpufkzw-{0}-njsc6x4cwb-njsc6x4cwb.gz
+D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\WeddingManagementSystem.sourcelink.json
+D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\compressed\xzwt0t6xto-{0}-7x5zp867qw-7x5zp867qw.gz
+D:\CHAMRERN\WeddingManagementSystem\obj\Debug\net10.0\compressed\0mkgpufkzw-{0}-h536mbicgb-h536mbicgb.gz

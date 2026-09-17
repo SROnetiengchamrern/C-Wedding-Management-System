@@ -1,0 +1,65 @@
+@model List<WeddingManagementSystem.Models.WeddingGift>
+@{
+    Layout = null;
+    var totalKhr = Model.Sum(g => g.AmountKhr);
+    var totalUsd = Model.Sum(g => g.AmountUsd);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Wedding Gifts — Print / PDF</title>
+    <style>
+        body { font-family: "Segoe UI", Arial, sans-serif; padding: 24px; color: #222; }
+        h1 { text-align: center; color: #1a5fb4; }
+        .sums { display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap; }
+        .sums div { padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border: 1px solid #bbb; padding: 6px 8px; text-align: left; }
+        th { background: #eee; }
+        @@media print {
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()" style="margin-bottom:12px;padding:8px 14px;">Print / Save as PDF</button>
+    <h1>Wedding Gift / Money Management</h1>
+    <div class="sums">
+        <div>Guests: <strong>@Model.Count</strong></div>
+        <div>KHR: <strong>@totalKhr.ToString("N0")</strong> ៛</div>
+        <div>USD: <strong>@totalUsd.ToString("N0")</strong> $</div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Guest</th>
+                <th>KHR</th>
+                <th>USD</th>
+                <th>Address</th>
+                <th>Relationship</th>
+                <th>Date</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+        @{ var i = 1; }
+        @foreach (var g in Model)
+        {
+            <tr>
+                <td>@i</td>
+                <td>@g.GuestName</td>
+                <td>@(g.AmountKhr > 0 ? $"{g.AmountKhr:N0} ៛" : "")</td>
+                <td>@(g.AmountUsd > 0 ? $"{g.AmountUsd:N0} $" : "")</td>
+                <td>@g.Address</td>
+                <td>@g.Relationship</td>
+                <td>@g.GiftDate.ToString("MMM d, yyyy")</td>
+                <td>@g.Notes</td>
+            </tr>
+            i++;
+        }
+        </tbody>
+    </table>
+</body>
+</html>

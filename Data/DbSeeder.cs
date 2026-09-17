@@ -451,6 +451,68 @@ public static class DbSeeder
             );
         }
 
+        if (!db.WeddingGifts.Any())
+        {
+            db.WeddingGifts.AddRange(CreateSampleGifts(id));
+        }
+        else if (db.WeddingGifts.Count() < 50)
+        {
+            var existing = db.WeddingGifts.Count();
+            var needed = CreateSampleGifts(id).Skip(existing).Take(50 - existing);
+            db.WeddingGifts.AddRange(needed);
+        }
+
         await db.SaveChangesAsync();
+    }
+
+    private static List<WeddingGift> CreateSampleGifts(int weddingId)
+    {
+        var names = new[]
+        {
+            "Sokha", "Vanna", "Rattana", "Dara", "Maly", "Pisey", "Chantra", "Sovann",
+            "Sreyneang", "Bopha", "Chenda", "Nary", "Phalla", "Sopheak", "Veasna", "Kunthea",
+            "Arun", "Bora", "Chhay", "Davith", "Eang", "Fiona Chen", "Gunnar", "Hanna Lee",
+            "សុខា", "វណ្ណា", "រតនា", "ដារ៉ា", "ម៉ាលី", "ពិសី", "ចំរើន", "សុវណ្ណារិទ្ធ",
+            "James Park", "Emily Tran", "Michael Sok", "Lisa Nguyen", "David Kim", "Anna Meas",
+            "Rithy", "Sreyleak", "Pich", "Thida", "Vuthy", "Sreymom", "Chanthou", "Makara",
+            "Navy", "Sopheap", "Kosal", "Sreypov", "Tola", "Sreymao", "ចន្ទ្រា", "បុប្ផា"
+        };
+
+        var addresses = new[]
+        {
+            "Phnom Penh", "Siem Reap", "Battambang", "Kampot", "Kandal", "Takeo", "Sihanoukville",
+            "Kampong Cham", "Prey Veng", "ភ្នំពេញ", "សៀមរាប", "Koh Keo", "Sambour", "Kratie",
+            "Pursat", "Oddar Meanchey"
+        };
+
+        var relationships = new[]
+        {
+            "Family", "Friend", "Colleague", "Neighbor", "Cousin", "Uncle", "Aunt", "Other",
+            "គ្រួសារ", "មិត្តភក្តិ", "មិត្តរួមការងារ"
+        };
+
+        var notes = new[] { "", "", "Table 1", "Table 2", "Table 3", "VIP", "Cash", "Transfer", "Khmer + English OK", "" };
+        var khrAmounts = new[] { 0m, 20000m, 50000m, 55000m, 100000m, 150000m, 200000m, 250000m, 300000m };
+        var usdAmounts = new[] { 0m, 10m, 20m, 25m, 50m, 75m, 100m, 150m, 200m };
+
+        var list = new List<WeddingGift>(50);
+        for (var i = 0; i < 50; i++)
+        {
+            var useKhr = i % 3 != 1;
+            var useUsd = i % 3 != 0;
+            list.Add(new WeddingGift
+            {
+                WeddingId = weddingId,
+                GuestName = names[i % names.Length] + (i >= names.Length ? $" {i + 1}" : ""),
+                AmountKhr = useKhr ? khrAmounts[i % khrAmounts.Length] : 0,
+                AmountUsd = useUsd ? usdAmounts[(i + 2) % usdAmounts.Length] : 0,
+                Address = addresses[i % addresses.Length],
+                Relationship = relationships[i % relationships.Length],
+                GiftDate = DateTime.Today.AddDays(-(i % 14)),
+                Notes = notes[i % notes.Length]
+            });
+        }
+
+        return list;
     }
 }

@@ -16,13 +16,26 @@
 </head>
 <body>
     <div class="app-shell">
-        <aside class="sidebar">
+        <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+
+        <header class="mobile-topbar">
+            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="appSidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="mobile-brand">
+                <div class="brand-mark">W</div>
+                <span>Wedding Admin</span>
+            </div>
+        </header>
+
+        <aside class="sidebar" id="appSidebar">
             <div class="brand">
                 <div class="brand-mark">W</div>
-                <div>
+                <div class="brand-text">
                     <div class="brand-name">Wedding Admin</div>
                     <span class="demo-tag">DEMO</span>
                 </div>
+                <button type="button" class="sidebar-close" id="sidebarClose" aria-label="Close menu">×</button>
             </div>
 
             <nav class="side-nav">
@@ -73,6 +86,10 @@
                 <a class="@(ctrl == "Guests" ? "active" : "")" asp-controller="Guests" asp-action="Index">
                     <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
                     <span class="nav-label">Guest Management</span>
+                </a>
+                <a class="@(ctrl == "Gifts" ? "active" : "")" asp-controller="Gifts" asp-action="Index">
+                    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20 12v8H4v-8"/><path d="M2 7h20v5H2z"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>
+                    <span class="nav-label">Gift Money</span>
                 </a>
                 <a class="@(ctrl == "Website" ? "active" : "")" asp-controller="Website" asp-action="Index">
                     <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a14 14 0 0 1 0 20M12 2a14 14 0 0 0 0 20"/></svg></span>

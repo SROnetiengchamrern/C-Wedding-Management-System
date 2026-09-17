@@ -25,6 +25,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ScheduleItem> ScheduleItems => Set<ScheduleItem>();
     public DbSet<WebsiteSettings> WebsiteSettings => Set<WebsiteSettings>();
     public DbSet<ImportedRecord> ImportedRecords => Set<ImportedRecord>();
+    public DbSet<WeddingGift> WeddingGifts => Set<WeddingGift>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -82,6 +83,13 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<ImportedRecord>()
             .HasOne(x => x.Wedding).WithMany(w => w.ImportedRecords).HasForeignKey(x => x.WeddingId).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WeddingGift>(e =>
+        {
+            e.Property(x => x.AmountKhr).HasPrecision(18, 2);
+            e.Property(x => x.AmountUsd).HasPrecision(18, 2);
+            e.HasOne(x => x.Wedding).WithMany(w => w.WeddingGifts).HasForeignKey(x => x.WeddingId).OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<WebsiteSettings>()
             .HasOne(x => x.Wedding)

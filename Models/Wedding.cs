@@ -44,6 +44,7 @@ public class Wedding
     public ICollection<DeliveryItem> DeliveryItems { get; set; } = new List<DeliveryItem>();
     public ICollection<ScheduleItem> ScheduleItems { get; set; } = new List<ScheduleItem>();
     public ICollection<ImportedRecord> ImportedRecords { get; set; } = new List<ImportedRecord>();
+    public ICollection<WeddingGift> WeddingGifts { get; set; } = new List<WeddingGift>();
     public WebsiteSettings? WebsiteSettings { get; set; }
 
     [NotMapped]
