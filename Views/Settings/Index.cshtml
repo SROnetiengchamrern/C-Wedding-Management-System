@@ -1,0 +1,27 @@
+@model WeddingManagementSystem.Models.Wedding
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<h1 class="page-title">Settings</h1>
+@if (TempData["Ok"] is string ok)
+{
+    <div class="info-banner">@ok</div>
+}
+
+<div class="form-card">
+    <form asp-action="Save" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group">
+            <label asp-for="TotalBudget">Total budget</label>
+            <input asp-for="TotalBudget" type="number" step="0.01" />
+        </div>
+        <div class="form-group">
+            <label asp-for="GuestPassword">Shared access password</label>
+            <input asp-for="GuestPassword" placeholder="Optional partner / planner password" />
+        </div>
+        <p class="muted sm-text">Use this for shared access notes. Full auth can be added later.</p>
+        <button type="submit" class="btn-gold">Save settings</button>
+    </form>
+</div>

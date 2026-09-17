@@ -1,0 +1,39 @@
+@using WeddingManagementSystem.Models
+@model List<Guest>
+@{
+    ViewData["Title"] = "Guest Management";
+}
+
+<div class="toolbar">
+    <h1 class="page-title">Guest Management</h1>
+    <a class="btn-gold" asp-action="Create">Add guest</a>
+</div>
+
+<div class="table-wrap">
+    <table class="data">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Side</th>
+                <th>RSVP</th>
+                <th>Party</th>
+                <th>Invite</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var g in Model)
+        {
+            <tr>
+                <td>
+                    <strong>@g.FullName</strong>
+                    <div class="muted sm-text">@g.Email</div>
+                </td>
+                <td>@(g.Side ?? "—")</td>
+                <td><span class="pill pill-pending">@g.RsvpStatus</span></td>
+                <td>@g.PartySize</td>
+                <td>@(g.InvitationSent ? "Sent" : "Not sent")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,81 @@
+@model WeddingManagementSystem.Models.Wedding
+@{
+    ViewData["Title"] = "Wedding Details";
+}
+
+<h1 class="page-title">Wedding Details</h1>
+@if (TempData["Ok"] is string ok)
+{
+    <div class="info-banner">@ok</div>
+}
+
+<div class="grid-2">
+    <div class="form-card" style="max-width:none;">
+        <h2 style="font-family:var(--font-display);margin-top:0;">Couple & venue</h2>
+        <form asp-action="Save" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Partner1Name">Partner 1</label>
+                <input asp-for="Partner1Name" required />
+            </div>
+            <div class="form-group">
+                <label asp-for="Partner2Name">Partner 2</label>
+                <input asp-for="Partner2Name" required />
+            </div>
+            <div class="form-group">
+                <label asp-for="WeddingDate">Wedding date</label>
+                <input asp-for="WeddingDate" type="date" />
+            </div>
+            <div class="form-group">
+                <label asp-for="VenueName">Venue</label>
+                <input asp-for="VenueName" />
+            </div>
+            <div class="form-group">
+                <label asp-for="VenueLocation">Location</label>
+                <input asp-for="VenueLocation" />
+            </div>
+            <div class="form-group">
+                <label asp-for="TotalBudget">Total budget</label>
+                <input asp-for="TotalBudget" type="number" step="0.01" />
+            </div>
+            <div class="form-group">
+                <label asp-for="CeremonyNotes">Ceremony notes</label>
+                <textarea asp-for="CeremonyNotes" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn-gold">Save details</button>
+        </form>
+    </div>
+
+    <div>
+        <div class="panel">
+            <div class="panel-head">
+                <h2>Style decisions</h2>
+            </div>
+            <div class="style-tags" style="grid-template-columns:1fr 1fr;">
+                @foreach (var s in Model.StyleDecisions)
+                {
+                    <div class="style-tag">
+                        <strong>@s.Category</strong>
+                        <span>@s.Decision</span>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="form-card" style="max-width:none;margin-top:1rem;">
+            <h3 style="margin-top:0;font-family:var(--font-display);">Add style decision</h3>
+            <form asp-action="AddStyle" method="post">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label>Category</label>
+                    <input name="category" required placeholder="Flowers, Decor…" />
+                </div>
+                <div class="form-group">
+                    <label>Decision</label>
+                    <input name="decision" placeholder="What you chose" />
+                </div>
+                <button type="submit" class="btn-outline">Add</button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+@model WeddingManagementSystem.Models.Document
+@{
+    ViewData["Title"] = "Add document";
+}
+
+<h1 class="page-title">Add document</h1>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="FileName">File name</label>
+            <input asp-for="FileName" required placeholder="Contract.pdf" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Category"></label>
+            <select asp-for="Category">
+                <option>Contract</option>
+                <option>Receipt</option>
+                <option>Invoice</option>
+                <option>Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label asp-for="FilePath">Path / URL (optional)</label>
+            <input asp-for="FilePath" />
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-gold">Save</button>
+            <a class="btn-outline" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>

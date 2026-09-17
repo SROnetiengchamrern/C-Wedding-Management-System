@@ -1,0 +1,39 @@
+@model WeddingManagementSystem.Models.Guest
+@{
+    ViewData["Title"] = "Add guest";
+}
+
+<h1 class="page-title">Add guest</h1>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="FullName">Full name</label>
+            <input asp-for="FullName" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" type="email" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Phone"></label>
+            <input asp-for="Phone" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Side"></label>
+            <select asp-for="Side">
+                <option value="Bride">Bride</option>
+                <option value="Groom">Groom</option>
+                <option value="Both">Both</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label asp-for="PartySize">Party size</label>
+            <input asp-for="PartySize" type="number" min="1" />
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-gold">Save</button>
+            <a class="btn-outline" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>

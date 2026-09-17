@@ -1,0 +1,31 @@
+@model WeddingManagementSystem.Models.TimelineEvent
+@{
+    ViewData["Title"] = "Add timeline event";
+}
+
+<h1 class="page-title">Add timeline event</h1>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="Title"></label>
+            <input asp-for="Title" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="EventDate">Date</label>
+            <input asp-for="EventDate" type="date" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Category"></label>
+            <input asp-for="Category" placeholder="Venue, Guests, Ceremony…" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-gold">Save</button>
+            <a class="btn-outline" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>

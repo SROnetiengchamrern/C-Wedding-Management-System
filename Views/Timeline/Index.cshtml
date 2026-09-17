@@ -1,0 +1,34 @@
+@model List<WeddingManagementSystem.Models.TimelineEvent>
+@{
+    ViewData["Title"] = "Timeline";
+}
+
+<div class="toolbar">
+    <h1 class="page-title">Timeline</h1>
+    <a class="btn-gold" asp-action="Create">Add event</a>
+</div>
+
+<div class="timeline">
+@foreach (var e in Model)
+{
+    <div class="timeline-item panel">
+        <div class="timeline-date">@e.EventDate.ToString("MMM d, yyyy")</div>
+        <div>
+            <h3>@e.Title</h3>
+            @if (!string.IsNullOrWhiteSpace(e.Category))
+            {
+                <span class="pill pill-pending">@e.Category</span>
+            }
+            @if (!string.IsNullOrWhiteSpace(e.Description))
+            {
+                <p class="muted">@e.Description</p>
+            }
+        </div>
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@e.Id" />
+            <button type="submit" class="btn-ghost">Remove</button>
+        </form>
+    </div>
+}
+</div>

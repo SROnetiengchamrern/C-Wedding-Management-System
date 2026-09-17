@@ -1,0 +1,35 @@
+@model WeddingManagementSystem.Models.WeddingTask
+@{
+    ViewData["Title"] = "Add task";
+}
+
+<h1 class="page-title">Add task</h1>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="Title"></label>
+            <input asp-for="Title" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="DueDate">Due date</label>
+            <input asp-for="DueDate" type="date" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Priority"></label>
+            <select asp-for="Priority">
+                <option value="1">High</option>
+                <option value="2">Medium</option>
+                <option value="3">Low</option>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-gold">Save</button>
+            <a class="btn-outline" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>

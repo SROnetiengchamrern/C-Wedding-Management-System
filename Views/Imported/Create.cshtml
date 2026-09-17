@@ -1,0 +1,32 @@
+@model WeddingManagementSystem.Models.ImportedRecord
+@{
+    ViewData["Title"] = "Add import";
+}
+
+<h1 class="page-title">Add import record</h1>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Source"></label>
+            <input asp-for="Source" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="RecordType">Type</label>
+            <select asp-for="RecordType">
+                <option>Guest</option>
+                <option>Vendor</option>
+                <option>Budget</option>
+                <option>Other</option>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-gold">Save</button>
+            <a class="btn-outline" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,76 @@
+@using WeddingManagementSystem.Models
+@model List<Payment>
+@{
+    ViewData["Title"] = "Budget";
+    var total = (decimal)(ViewBag.TotalBudget ?? 0m);
+    var paid = (decimal)(ViewBag.Paid ?? 0m);
+}
+
+<div class="toolbar">
+    <h1 class="page-title">Budget</h1>
+    <a class="btn-gold" asp-action="Create">Add payment</a>
+</div>
+
+<div class="stat-row">
+    <div class="stat-card">
+        <div class="stat-label">Total budget</div>
+        <div class="stat-value" style="font-size:2rem;">@total.ToString("C0")</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Paid</div>
+        <div class="stat-value" style="font-size:2rem;">@paid.ToString("C0")</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Remaining</div>
+        <div class="stat-value" style="font-size:2rem;">@((total - paid).ToString("C0"))</div>
+    </div>
+</div>
+
+<div class="table-wrap">
+    <table class="data">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Vendor</th>
+                <th>Due</th>
+                <th>Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td><strong>@p.Description</strong></td>
+                <td>@(p.Vendor?.Name ?? "—")</td>
+                <td>@(p.DueDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                <td>@p.Amount.ToString("C0")</td>
+                <td>
+                    @if (p.Status == PaymentStatus.Paid)
+                    {
+                        <span class="pill pill-paid">Paid</span>
+                    }
+                    else if (p.Status is PaymentStatus.Due or PaymentStatus.Overdue)
+                    {
+                        <span class="pill pill-due">@p.Status</span>
+                        <form asp-action="MarkPaid" method="post" class="inline-form" style="margin-left:.4rem;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button type="submit" class="link-gold" style="background:none;border:0;cursor:pointer;">Mark paid</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="pill pill-pending">Upcoming</span>
+                        <form asp-action="MarkPaid" method="post" class="inline-form" style="margin-left:.4rem;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button type="submit" class="link-gold" style="background:none;border:0;cursor:pointer;">Mark paid</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

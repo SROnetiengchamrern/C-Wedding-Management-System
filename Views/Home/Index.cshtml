@@ -1,0 +1,230 @@
+﻿@using WeddingManagementSystem.Models
+@model WeddingManagementSystem.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Overview";
+    var w = Model.Wedding;
+    var paidPct = Model.TotalBudget > 0 ? (int)Math.Round(Model.AmountPaid / Model.TotalBudget * 100) : 0;
+    var guestPct = Model.GuestEssentialsTotal > 0
+        ? (int)Math.Round((double)Model.GuestEssentialsDone / Model.GuestEssentialsTotal * 100)
+        : 0;
+}
+
+<div class="dash-header">
+    <div>
+        <p class="eyebrow">Your wedding</p>
+        <h1 class="couple-name">@w.CoupleDisplayName</h1>
+        <p class="wedding-meta">
+            <span>@w.WeddingDate.ToString("MMM d, yyyy")</span>
+            @if (!string.IsNullOrWhiteSpace(w.VenueName))
+            {
+                <span class="dot">·</span>
+                <span>@w.VenueName@(string.IsNullOrWhiteSpace(w.VenueLocation) ? "" : $", {w.VenueLocation}")</span>
+            }
+        </p>
+    </div>
+    <a class="btn-gold" asp-controller="Tasks" asp-action="Create">Get Started</a>
+</div>
+
+<div class="info-banner">
+    <span class="info-icon">i</span>
+    Manage shared access and notifications in Settings when you’re ready to invite your partner or planner.
+</div>
+
+<div class="stat-row">
+    <div class="stat-card">
+        <div class="stat-label">Days Left</div>
+        <div class="stat-value">@Model.DaysLeft</div>
+        <div class="stat-sub">Agreements</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Tasks Completed</div>
+        <div class="stat-value">@Model.TasksCompleted<span class="stat-of">/@Model.TasksTotal</span></div>
+        <div class="stat-sub">Across all checklists</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Paid</div>
+        <div class="stat-value">@Model.AmountPaid.ToString("C0")</div>
+        <div class="stat-sub">of @Model.TotalBudget.ToString("C0") · @paidPct%</div>
+    </div>
+</div>
+
+<div class="status-row">
+    <div class="status-chip @(Model.OverdueTasks > 0 ? "warn" : "")">
+        <span class="chip-icon">!</span>
+        <div>
+            <strong>@Model.OverdueTasks Overdue</strong>
+            <span>tasks need attention</span>
+        </div>
+    </div>
+    <div class="status-chip ok">
+        <span class="chip-icon">✓</span>
+        <div>
+            <strong>@Model.PaymentsOnTrack Payments</strong>
+            <span>on track</span>
+        </div>
+    </div>
+    <div class="status-chip">
+        <span class="chip-icon">◷</span>
+        <div>
+            <strong>@Model.TasksThisWeek Tasks</strong>
+            <span>this week</span>
+        </div>
+    </div>
+    <div class="status-chip">
+        <span class="chip-icon">$</span>
+        <div>
+            <strong>@Model.PaymentsThisWeek Payment</strong>
+            <span>this week</span>
+        </div>
+    </div>
+</div>
+
+<div class="panel next-step">
+    <div class="panel-head">
+        <h2>Next step</h2>
+        @if (Model.NextStepTask?.IsOverdue == true)
+        {
+            <span class="badge-overdue">Overdue</span>
+        }
+    </div>
+    @if (Model.NextStepTask is not null)
+    {
+        <h3>@Model.NextStepTask.Title</h3>
+        <p class="muted">
+            @(Model.NextStepTask.DueDate?.ToString("MMM d, yyyy") ?? "No due date")
+            @if (!string.IsNullOrWhiteSpace(Model.NextStepTask.Description))
+            {
+                <span>— @Model.NextStepTask.Description</span>
+            }
+        </p>
+        <div class="action-row">
+            <a class="btn-outline" asp-controller="Tasks" asp-action="Edit" asp-route-id="@Model.NextStepTask.Id">Go to task</a>
+            <form asp-action="MarkTaskDone" method="post" class="inline-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.NextStepTask.Id" />
+                <button type="submit" class="btn-ghost">Already done</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <p class="muted">You’re all caught up — nice work.</p>
+    }
+</div>
+
+<div class="grid-2">
+    <div class="mini-panel">
+        <h3>Upload venue contract</h3>
+        <p class="muted">Keep signed agreements in Documents for easy access.</p>
+        <a class="link-gold" asp-controller="Documents" asp-action="Index">Open documents →</a>
+    </div>
+    <div class="mini-panel">
+        <h3>Payment due</h3>
+        @if (Model.NextPayment is not null)
+        {
+            <p class="muted">@Model.NextPayment.Description (@Model.NextPayment.Amount.ToString("C0")@(Model.NextPayment.Vendor is null ? "" : $" to {Model.NextPayment.Vendor.Name}"))</p>
+            <a class="link-gold" asp-controller="Budget" asp-action="Index">View budget →</a>
+        }
+        else
+        {
+            <p class="muted">No upcoming payments.</p>
+        }
+    </div>
+</div>
+
+<div class="ai-bar">
+    <div>
+        <strong>Personal AI advisor</strong>
+        <span class="muted">Get a suggested next step based on your plan.</span>
+    </div>
+    <button type="button" class="btn-outline" disabled title="Coming soon">Suggest next step (AI)</button>
+</div>
+
+<div class="grid-2">
+    <div class="panel">
+        <div class="panel-head">
+            <h2>Upcoming deadlines</h2>
+            <a asp-controller="Tasks" asp-action="Index" class="link-gold">View all</a>
+        </div>
+        <ul class="list-rows">
+            @foreach (var t in Model.UpcomingDeadlines)
+            {
+                <li>
+                    <div>
+                        <strong>@t.Title</strong>
+                        @if (t.IsOverdue)
+                        {
+                            <span class="badge-overdue sm">Overdue</span>
+                        }
+                    </div>
+                    <span class="muted">@(t.DueDate?.ToString("MMM d, yyyy") ?? "—")</span>
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="panel">
+        <div class="panel-head">
+            <h2>Upcoming payments</h2>
+            <a asp-controller="Budget" asp-action="Index" class="link-gold">View all</a>
+        </div>
+        <ul class="list-rows">
+            @foreach (var p in Model.UpcomingPayments)
+            {
+                <li>
+                    <div>
+                        <strong>@(p.Vendor?.Name ?? p.Description)</strong>
+                        <div class="muted sm-text">@p.Description</div>
+                    </div>
+                    <div class="text-end">
+                        <strong>@p.Amount.ToString("C0")</strong>
+                        <div class="muted sm-text">@(p.DueDate?.ToString("MMM d") ?? "—")</div>
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-head">
+        <h2>Wedding readiness</h2>
+    </div>
+    <div class="readiness">
+        <div class="readiness-label">
+            <span>Guest Essentials</span>
+            <span>@Model.GuestEssentialsDone/@Model.GuestEssentialsTotal</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" style="width:@guestPct%"></div>
+        </div>
+    </div>
+    <h3 class="subhead">Approved style decisions</h3>
+    <div class="style-tags">
+        @foreach (var s in Model.ApprovedStyles)
+        {
+            <div class="style-tag">
+                <strong>@s.Category</strong>
+                <span>@s.Decision</span>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-head">
+        <h2>Recent documents</h2>
+        <a asp-controller="Documents" asp-action="Index" class="link-gold">View all</a>
+    </div>
+    <ul class="doc-list">
+        @foreach (var d in Model.RecentDocuments)
+        {
+            <li>
+                <span class="doc-icon">PDF</span>
+                <div>
+                    <strong>@d.FileName</strong>
+                    <div class="muted sm-text">@d.UploadedAt.ToLocalTime().ToString("MMM d, yyyy") · @(d.Category ?? "File")</div>
+                </div>
+            </li>
+        }
+    </ul>
+</div>

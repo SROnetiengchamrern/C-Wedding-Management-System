@@ -1,0 +1,24 @@
+@using WeddingManagementSystem.Models
+@model Agreement
+@{
+    ViewData["Title"] = "Add agreement";
+}
+
+<h1 class="page-title">Add agreement</h1>
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="Title"></label>
+            <input asp-for="Title" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Status"></label>
+            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AgreementStatus>()"></select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-gold">Save</button>
+            <a class="btn-outline" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>

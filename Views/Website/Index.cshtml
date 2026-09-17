@@ -1,0 +1,44 @@
+@model WeddingManagementSystem.Models.WebsiteSettings
+@{
+    ViewData["Title"] = "Wedding Website";
+}
+
+<div class="toolbar">
+    <h1 class="page-title">Wedding Website</h1>
+    <a class="btn-outline" asp-action="Preview" target="_blank">Preview</a>
+</div>
+
+@if (TempData["Ok"] is string ok)
+{
+    <div class="info-banner">@ok</div>
+}
+
+<div class="form-card" style="max-width:640px;">
+    <form asp-action="Save" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="WeddingId" />
+        <div class="form-group">
+            <label asp-for="SiteTitle">Site title</label>
+            <input asp-for="SiteTitle" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Slug">URL slug</label>
+            <input asp-for="Slug" />
+        </div>
+        <div class="form-group">
+            <label asp-for="WelcomeMessage">Welcome message</label>
+            <textarea asp-for="WelcomeMessage" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="RsvpUrl">RSVP link</label>
+            <input asp-for="RsvpUrl" />
+        </div>
+        <div class="form-group">
+            <label>
+                <input asp-for="IsPublished" /> Published
+            </label>
+        </div>
+        <button type="submit" class="btn-gold">Save website</button>
+    </form>
+</div>

@@ -1,0 +1,37 @@
+@model List<WeddingManagementSystem.Models.InboxMessage>
+@{
+    ViewData["Title"] = "Inbox";
+}
+
+<div class="toolbar">
+    <h1 class="page-title">Inbox</h1>
+    <a class="btn-gold" asp-action="Compose">Compose</a>
+</div>
+
+<div class="table-wrap">
+    <table class="data">
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>Subject</th>
+                <th>Received</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var m in Model)
+        {
+            <tr style="@(m.IsRead ? "" : "font-weight:600;")">
+                <td>
+                    <a asp-action="Details" asp-route-id="@m.Id" class="link-gold">@m.FromName</a>
+                    @if (!m.IsRead)
+                    {
+                        <span class="pill pill-due">New</span>
+                    }
+                </td>
+                <td>@m.Subject</td>
+                <td>@m.ReceivedAt.ToLocalTime().ToString("MMM d, h:mm tt")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

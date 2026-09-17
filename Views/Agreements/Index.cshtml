@@ -1,0 +1,52 @@
+@using WeddingManagementSystem.Models
+@model List<Agreement>
+@{
+    ViewData["Title"] = "Agreements";
+}
+
+<div class="toolbar">
+    <h1 class="page-title">Agreements</h1>
+    <a class="btn-gold" asp-action="Create">Add agreement</a>
+</div>
+
+<div class="table-wrap">
+    <table class="data">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Signed</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td><strong>@a.Title</strong></td>
+                <td>
+                    @if (a.Status == AgreementStatus.Signed)
+                    {
+                        <span class="pill pill-done">Signed</span>
+                    }
+                    else
+                    {
+                        <span class="pill pill-pending">@a.Status</span>
+                    }
+                </td>
+                <td>@(a.SignedAt?.ToLocalTime().ToString("MMM d, yyyy") ?? "—")</td>
+                <td class="text-end">
+                    @if (a.Status != AgreementStatus.Signed)
+                    {
+                        <form asp-action="MarkSigned" method="post" class="inline-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@a.Id" />
+                            <button type="submit" class="link-gold" style="background:none;border:0;cursor:pointer;">Mark signed</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

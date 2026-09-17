@@ -1,0 +1,47 @@
+@model List<WeddingManagementSystem.Models.MenuItem>
+@{
+    ViewData["Title"] = "Menu";
+}
+
+<div class="toolbar">
+    <h1 class="page-title">Menu</h1>
+    <a class="btn-gold" asp-action="Create">Add dish</a>
+</div>
+
+<div class="table-wrap">
+    <table class="data">
+        <thead>
+            <tr>
+                <th>Dish</th>
+                <th>Course</th>
+                <th>Dietary</th>
+                <th>Price / guest</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>
+                    <strong>@m.Name</strong>
+                    @if (!string.IsNullOrWhiteSpace(m.Description))
+                    {
+                        <div class="muted sm-text">@m.Description</div>
+                    }
+                </td>
+                <td>@m.Course</td>
+                <td>@(m.DietaryNotes ?? "—")</td>
+                <td>@(m.PricePerGuest?.ToString("C0") ?? "—")</td>
+                <td class="text-end">
+                    <form asp-action="Delete" method="post" class="inline-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@m.Id" />
+                        <button type="submit" class="btn-ghost">Remove</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

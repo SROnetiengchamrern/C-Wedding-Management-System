@@ -1,0 +1,35 @@
+@model List<WeddingManagementSystem.Models.ImportedRecord>
+@{
+    ViewData["Title"] = "Imported";
+}
+
+<div class="toolbar">
+    <h1 class="page-title">Imported</h1>
+    <a class="btn-gold" asp-action="Create">Add import</a>
+</div>
+
+<div class="table-wrap">
+    <table class="data">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Source</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Imported</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var i in Model)
+        {
+            <tr>
+                <td><strong>@i.Name</strong></td>
+                <td>@i.Source</td>
+                <td>@(i.RecordType ?? "—")</td>
+                <td><span class="pill pill-done">@i.Status</span></td>
+                <td>@i.ImportedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
