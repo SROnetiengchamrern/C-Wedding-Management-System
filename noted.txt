@@ -1,0 +1,15 @@
+cd D:\path\to\WeddingManagementSystem
+dotnet restore
+dotnet tool install --global dotnet-ef
+sqlcmd -S . -E -C -Q "IF DB_ID('WeddingManagementSystem') IS NULL CREATE DATABASE WeddingManagementSystem;"
+dotnet ef database update
+dotnet build
+dotnet run
+
+
+Short version (copy-paste)
+cd D:\path\to\WeddingManagementSystem
+dotnet restore
+dotnet tool install --global dotnet-ef
+dotnet ef database update
+dotnet run
