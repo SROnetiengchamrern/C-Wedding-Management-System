@@ -17,7 +17,8 @@ public static class DbSeeder
             WeddingDate = new DateTime(2026, 9, 22),
             VenueName = "Oakwood Manor",
             VenueLocation = "Sonoma County",
-            TotalBudget = 44950m
+            TotalBudget = 44950m,
+            WebId = 2026
         };
 
         db.Weddings.Add(wedding);
@@ -463,6 +464,82 @@ public static class DbSeeder
         }
 
         await db.SaveChangesAsync();
+        await SeedSampleCouplesAsync(db);
+    }
+
+    /// <summary>Extra sample couples for multi-wedding website list.</summary>
+    public static async Task SeedSampleCouplesAsync(ApplicationDbContext db)
+    {
+        var samples = new[]
+        {
+            new { P1 = "Thona", P2 = "Jenna", Date = new DateTime(2026, 11, 15), Venue = "Riverside Garden", Loc = "Phnom Penh", Slug = "thona-jenna", Theme = 2, Pub = true },
+            new { P1 = "John", P2 = "Marr", Date = new DateTime(2027, 2, 14), Venue = "Skyline Ballroom", Loc = "Siem Reap", Slug = "john-marr", Theme = 3, Pub = true },
+            new { P1 = "Sokha", P2 = "Dara", Date = new DateTime(2026, 12, 5), Venue = "Angkor Pavilion", Loc = "Siem Reap", Slug = "sokha-dara", Theme = 1, Pub = false },
+            new { P1 = "Alex", P2 = "Jordan", Date = new DateTime(2027, 4, 20), Venue = "Coastal Manor", Loc = "Kampot", Slug = "alex-jordan", Theme = 5, Pub = true }
+        };
+
+        foreach (var s in samples)
+        {
+            var exists = await db.Weddings.AnyAsync(w =>
+                w.Partner1Name == s.P1 && w.Partner2Name == s.P2);
+            if (exists) continue;
+
+            var wedding = new Wedding
+            {
+                Partner1Name = s.P1,
+                Partner2Name = s.P2,
+                WeddingDate = s.Date,
+                VenueName = s.Venue,
+                VenueLocation = s.Loc,
+                TotalBudget = 25000m,
+                WebId = (await db.Weddings.MaxAsync(w => (int?)w.WebId) ?? 2025) + 1
+            };
+            db.Weddings.Add(wedding);
+            await db.SaveChangesAsync();
+
+            var slugTaken = await db.WebsiteSettings.AnyAsync(x => x.Slug == s.Slug);
+            db.WebsiteSettings.Add(new WebsiteSettings
+            {
+                WeddingId = wedding.Id,
+                SiteTitle = $"{s.P1} & {s.P2}",
+                Slug = slugTaken ? $"{s.Slug}-{wedding.Id}" : s.Slug,
+                WelcomeMessage = $"Welcome to {s.P1} & {s.P2}'s wedding celebration.",
+                ShareDescription = $"You're invited to celebrate with {s.P1} & {s.P2}.",
+                InviteMessage = "We can't wait to celebrate with you.",
+                ThemeLayout = s.Theme,
+                ShowMap = true,
+                MapSearch = s.Loc,
+                IsPublished = s.Pub
+            });
+            await db.SaveChangesAsync();
+        }
+
+        // Ensure every existing wedding has website settings
+        var missing = await db.Weddings
+            .Include(w => w.WebsiteSettings)
+            .Where(w => w.WebsiteSettings == null)
+            .ToListAsync();
+        foreach (var w in missing)
+        {
+            var baseSlug = $"{w.Partner1Name}-{w.Partner2Name}".Trim().ToLowerInvariant().Replace(" ", "-");
+            var slug = baseSlug;
+            var i = 2;
+            while (await db.WebsiteSettings.AnyAsync(x => x.Slug == slug))
+                slug = $"{baseSlug}-{i++}";
+
+            db.WebsiteSettings.Add(new WebsiteSettings
+            {
+                WeddingId = w.Id,
+                SiteTitle = w.CoupleDisplayName,
+                Slug = slug,
+                WelcomeMessage = "We're getting married! Join us for our celebration.",
+                ThemeLayout = 6,
+                ShowMap = true,
+                IsPublished = false
+            });
+        }
+        if (missing.Count > 0)
+            await db.SaveChangesAsync();
     }
 
     private static List<WeddingGift> CreateSampleGifts(int weddingId)

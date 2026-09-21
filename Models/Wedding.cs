@@ -7,6 +7,9 @@ public class Wedding
 {
     public int Id { get; set; }
 
+    /// <summary>Public website id, starting at 2026 and increasing by 1.</summary>
+    public int WebId { get; set; }
+
     [Required, MaxLength(100)]
     public string Partner1Name { get; set; } = string.Empty;
 

@@ -1,44 +1,102 @@
-@model WeddingManagementSystem.Models.WebsiteSettings
+﻿@using WeddingManagementSystem.Models
+@model List<Wedding>
 @{
     ViewData["Title"] = "Wedding Website";
+    var n = 1;
 }
 
 <div class="toolbar">
-    <h1 class="page-title">Wedding Website</h1>
-    <a class="btn-outline" asp-action="Preview" target="_blank">Preview</a>
+    <div>
+        <h1 class="page-title">Wedding Website</h1>
+        <p class="muted" style="margin:0;">Choose a couple to edit their invitation site, or add a new partner below.</p>
+    </div>
 </div>
 
 @if (TempData["Ok"] is string ok)
 {
     <div class="info-banner">@ok</div>
 }
+@if (TempData["Error"] is string err)
+{
+    <div class="info-banner" style="background:#fde8e8;border-color:#f0b4b4;color:#8a1f1f;">@err</div>
+}
 
-<div class="form-card" style="max-width:640px;">
-    <form asp-action="Save" method="post">
+<section class="invite-admin-card partner-add-card">
+    <h2>Add new partner</h2>
+    <p class="muted">Create a couple — their invite site is set up as a draft automatically.</p>
+    <form asp-action="CreatePartner" method="post" class="partner-add-form">
         @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Id" />
-        <input type="hidden" asp-for="WeddingId" />
-        <div class="form-group">
-            <label asp-for="SiteTitle">Site title</label>
-            <input asp-for="SiteTitle" required />
+        <div class="partner-add-grid">
+            <div class="form-group">
+                <label for="partner1Name">Partner 1</label>
+                <input id="partner1Name" name="partner1Name" type="text" required maxlength="100" placeholder="Emma" />
+            </div>
+            <div class="form-group">
+                <label for="partner2Name">Partner 2</label>
+                <input id="partner2Name" name="partner2Name" type="text" required maxlength="100" placeholder="James" />
+            </div>
+            <div class="form-group">
+                <label for="weddingDate">Wedding date</label>
+                <input id="weddingDate" name="weddingDate" type="date" value="@DateTime.Today.AddMonths(6).ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="form-group">
+                <label for="slug">URL slug (optional)</label>
+                <input id="slug" name="slug" type="text" maxlength="100" placeholder="emma-james" />
+            </div>
+            <div class="form-group">
+                <label for="venueName">Venue name</label>
+                <input id="venueName" name="venueName" type="text" maxlength="200" placeholder="Oakwood Manor" />
+            </div>
+            <div class="form-group">
+                <label for="venueLocation">Venue location</label>
+                <input id="venueLocation" name="venueLocation" type="text" maxlength="200" placeholder="Phnom Penh" />
+            </div>
         </div>
-        <div class="form-group">
-            <label asp-for="Slug">URL slug</label>
-            <input asp-for="Slug" />
-        </div>
-        <div class="form-group">
-            <label asp-for="WelcomeMessage">Welcome message</label>
-            <textarea asp-for="WelcomeMessage" rows="4"></textarea>
-        </div>
-        <div class="form-group">
-            <label asp-for="RsvpUrl">RSVP link</label>
-            <input asp-for="RsvpUrl" />
-        </div>
-        <div class="form-group">
-            <label>
-                <input asp-for="IsPublished" /> Published
-            </label>
-        </div>
-        <button type="submit" class="btn-gold">Save website</button>
+        <button type="submit" class="btn-invite-primary">Add partner</button>
     </form>
+</section>
+
+<div class="wedding-site-list">
+@foreach (var w in Model)
+{
+    var settings = w.WebsiteSettings;
+    var slug = settings?.Slug;
+    var published = settings?.IsPublished == true;
+    <div class="wedding-site-row">
+        <a class="wedding-site-link" asp-action="Edit" asp-route-weddingId="@w.Id">
+            <span class="wedding-site-num">@n.</span>
+            <span class="wedding-site-main">
+                <strong>@w.CoupleDisplayName</strong>
+                <span class="muted sm-text">
+                    @w.WeddingDate.ToString("MMM d, yyyy")
+                    @if (!string.IsNullOrWhiteSpace(w.VenueName))
+                    {
+                        <text> · @w.VenueName</text>
+                    }
+                </span>
+                <span class="muted sm-text">web_id: @w.WebId</span>
+                @if (!string.IsNullOrWhiteSpace(slug))
+                {
+                    <span class="muted sm-text">/w/@slug</span>
+                }
+            </span>
+            <span class="wedding-site-arrow">Edit →</span>
+        </a>
+        <form asp-action="TogglePublish" method="post" class="wedding-site-status">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="weddingId" value="@w.Id" />
+            <button type="submit" class="wedding-site-badge @(published ? "live" : "draft")" title="@(published ? "Click to set Draft" : "Click to Publish")">
+                @(published ? "Published" : "Draft")
+            </button>
+        </form>
+    </div>
+    n++;
+}
 </div>
+
+@if (!Model.Any())
+{
+    <div class="invite-admin-card" style="margin-top:1rem;">
+        <p class="muted" style="margin:0;">No partners yet — use the form above to add the first couple.</p>
+    </div>
+}

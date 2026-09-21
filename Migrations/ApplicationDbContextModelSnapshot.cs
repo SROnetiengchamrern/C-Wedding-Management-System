@@ -472,6 +472,109 @@ namespace WeddingManagementSystem.Migrations
                     b.ToTable("Vendors");
                 });
 
+            modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteBankQr", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WebsiteSettingsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WebsiteSettingsId");
+
+                    b.ToTable("WebsiteBankQrs");
+                });
+
+            modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteGalleryPhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WebsiteSettingsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WebsiteSettingsId");
+
+                    b.ToTable("WebsiteGalleryPhotos");
+                });
+
+            modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteRsvp", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DietaryNotes")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("Reply")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WeddingId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WeddingId");
+
+                    b.ToTable("WebsiteRsvps");
+                });
+
             modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteSettings", b =>
                 {
                     b.Property<int>("Id")
@@ -480,12 +583,39 @@ namespace WeddingManagementSystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CoverImageUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("InviteMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
+
+                    b.Property<string>("MapSearch")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("MusicUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("RsvpUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ShareDescription")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("ShareImageUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("ShowMap")
+                        .HasColumnType("bit");
 
                     b.Property<string>("SiteTitle")
                         .IsRequired()
@@ -495,6 +625,9 @@ namespace WeddingManagementSystem.Migrations
                     b.Property<string>("Slug")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ThemeLayout")
+                        .HasColumnType("int");
 
                     b.Property<int>("WeddingId")
                         .HasColumnType("int");
@@ -549,10 +682,16 @@ namespace WeddingManagementSystem.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int>("WebId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("WeddingDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("WebId")
+                        .IsUnique();
 
                     b.ToTable("Weddings");
                 });
@@ -781,6 +920,39 @@ namespace WeddingManagementSystem.Migrations
                     b.Navigation("Wedding");
                 });
 
+            modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteBankQr", b =>
+                {
+                    b.HasOne("WeddingManagementSystem.Models.WebsiteSettings", "WebsiteSettings")
+                        .WithMany("BankQrs")
+                        .HasForeignKey("WebsiteSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WebsiteSettings");
+                });
+
+            modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteGalleryPhoto", b =>
+                {
+                    b.HasOne("WeddingManagementSystem.Models.WebsiteSettings", "WebsiteSettings")
+                        .WithMany("GalleryPhotos")
+                        .HasForeignKey("WebsiteSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WebsiteSettings");
+                });
+
+            modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteRsvp", b =>
+                {
+                    b.HasOne("WeddingManagementSystem.Models.Wedding", "Wedding")
+                        .WithMany()
+                        .HasForeignKey("WeddingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Wedding");
+                });
+
             modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteSettings", b =>
                 {
                     b.HasOne("WeddingManagementSystem.Models.Wedding", "Wedding")
@@ -817,6 +989,13 @@ namespace WeddingManagementSystem.Migrations
             modelBuilder.Entity("WeddingManagementSystem.Models.Vendor", b =>
                 {
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("WeddingManagementSystem.Models.WebsiteSettings", b =>
+                {
+                    b.Navigation("BankQrs");
+
+                    b.Navigation("GalleryPhotos");
                 });
 
             modelBuilder.Entity("WeddingManagementSystem.Models.Wedding", b =>

@@ -1,0 +1,377 @@
+﻿@using WeddingManagementSystem.Models
+@model WebsiteSettings
+@{
+    ViewData["Title"] = "Edit invitation";
+    var publicUrl = ViewBag.PublicUrl as string ?? "";
+    var themes = (IReadOnlyList<InviteThemes.ThemeInfo>)(ViewBag.Themes ?? InviteThemes.All);
+    var shareDesc = !string.IsNullOrWhiteSpace(Model.ShareDescription) ? Model.ShareDescription : Model.WelcomeMessage;
+    var mapQuery = Uri.EscapeDataString(Model.MapSearch ?? "");
+    var couple = Model.Wedding?.CoupleDisplayName ?? Model.SiteTitle;
+}
+
+<div class="toolbar">
+    <div>
+        <p class="muted sm-text" style="margin:0 0 .25rem;"><a asp-action="Index" class="link-gold">← All weddings</a></p>
+        <h1 class="page-title">Edit invitation</h1>
+        <p class="muted" style="margin:0;">
+            <strong>@couple</strong>
+            @if (Model.Wedding is not null)
+            {
+                <span class="sm-text"> · web_id: @Model.Wedding.WebId</span>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Slug))
+            {
+                <span class="d-block">
+                    <br />Public link: <a href="@($"/w/{Model.Slug}")" target="_blank">/w/@Model.Slug</a>
+                    @if (!string.IsNullOrWhiteSpace(publicUrl))
+                    {
+                        <br /><span class="sm-text">Share URL: @publicUrl</span>
+                    }
+                </span>
+            }
+        </p>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <a class="btn-outline" asp-action="Preview" asp-route-weddingId="@Model.WeddingId" target="_blank">Preview</a>
+        @if (Model.IsPublished && !string.IsNullOrWhiteSpace(publicUrl))
+        {
+            <a class="btn-gold" href="@publicUrl" target="_blank">Open public link</a>
+        }
+    </div>
+</div>
+
+@if (TempData["Ok"] is string ok)
+{
+    <div class="info-banner">@ok</div>
+}
+@if (TempData["Error"] is string err)
+{
+    <div class="info-banner" style="background:#fde8e8;border-color:#f0b4b4;color:#8a1f1f;">@err</div>
+}
+
+<div class="invite-admin-stack">
+@* —— Theme —— *@
+<section class="invite-admin-card">
+    <h2>Invite page theme</h2>
+    <p class="muted">Pick a layout for the public invite. Guests only see content — this changes colors, framing, and typography.</p>
+    <form asp-action="SaveTheme" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div class="theme-list">
+            @foreach (var t in themes)
+            {
+                <label class="theme-option @(Model.ThemeLayout == t.Id ? "selected" : "")">
+                    <input type="radio" name="themeLayout" value="@t.Id" @(Model.ThemeLayout == t.Id ? "checked" : "") />
+                    <span class="theme-swatch" style="background:@t.Primary"></span>
+                    <span>
+                        <strong>@t.Name</strong>
+                        <span class="muted sm-text">@t.Description</span>
+                    </span>
+                </label>
+            }
+        </div>
+        <button type="submit" class="btn-invite-primary">Save theme only</button>
+        <p class="muted sm-text">Use <strong>Save theme only</strong> to apply the layout without saving the rest of the form. Or use <strong>Save changes</strong> at the bottom to save everything at once.</p>
+    </form>
+</section>
+
+@* —— Bank QR —— *@
+<section class="invite-admin-card">
+    <h2>Bank transfer QR (QR_CODE_BANK)</h2>
+    <p class="muted">Upload PNG or JPEG images of bank PromptPay / account QR codes. They appear on the public invite. Max ~900KB each, up to 5. Reorder with Up/Down, then keep using Save bank QR after uploads.</p>
+    <form asp-action="UploadBankQr" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div class="form-group">
+            <label>Add images</label>
+            <input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple />
+        </div>
+        <button type="submit" class="btn-invite-soft">Choose / upload files</button>
+    </form>
+
+    <div class="media-list">
+        @for (var i = 0; i < Model.BankQrs.Count; i++)
+        {
+            var q = Model.BankQrs.ElementAt(i);
+            <div class="media-row">
+                <img src="@q.FilePath" alt="@q.Label" />
+                <strong>@q.Label</strong>
+                <div class="media-actions">
+                    <form asp-action="MoveBankQr" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@q.Id" />
+                        <input type="hidden" name="direction" value="up" />
+                        <button type="submit" class="btn-row" @(i == 0 ? "disabled" : null)>Up</button>
+                    </form>
+                    <form asp-action="MoveBankQr" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@q.Id" />
+                        <input type="hidden" name="direction" value="down" />
+                        <button type="submit" class="btn-row" @(i == Model.BankQrs.Count - 1 ? "disabled" : null)>Down</button>
+                    </form>
+                    <form asp-action="RemoveBankQr" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@q.Id" />
+                        <button type="submit" class="btn-row delete">Remove</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+    @if (Model.BankQrs.Any())
+    {
+        <form asp-action="RemoveAllBankQr" method="post" style="margin-top:.75rem;">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="settingsId" value="@Model.Id" />
+            <button type="submit" class="btn-outline">Remove all bank QR</button>
+        </form>
+    }
+</section>
+
+@* —— Gallery —— *@
+<section class="invite-admin-card">
+    <h2>Photo gallery</h2>
+    <p class="muted">Add several images; they appear on the public invite in a horizontal gallery. Same per-file size limit (~900KB), up to 15 photos. Reorder with Up/Down.</p>
+    <form asp-action="UploadGallery" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div class="form-group">
+            <label>Add images</label>
+            <input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple />
+        </div>
+        <button type="submit" class="btn-invite-soft">Choose / upload files</button>
+    </form>
+    <div class="media-list">
+        @for (var i = 0; i < Model.GalleryPhotos.Count; i++)
+        {
+            var p = Model.GalleryPhotos.ElementAt(i);
+            <div class="media-row">
+                <img src="@p.FilePath" alt="@p.Label" />
+                <strong>@p.Label</strong>
+                <div class="media-actions">
+                    <form asp-action="MoveGallery" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <input type="hidden" name="direction" value="up" />
+                        <button type="submit" class="btn-row" @(i == 0 ? "disabled" : null)>Up</button>
+                    </form>
+                    <form asp-action="MoveGallery" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <input type="hidden" name="direction" value="down" />
+                        <button type="submit" class="btn-row" @(i == Model.GalleryPhotos.Count - 1 ? "disabled" : null)>Down</button>
+                    </form>
+                    <form asp-action="RemoveGallery" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <button type="submit" class="btn-row delete">Remove</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@* —— Main settings + map / music / share —— *@
+<form asp-action="Save" method="post" enctype="multipart/form-data" class="invite-admin-card">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="WeddingId" />
+    <input type="hidden" asp-for="ThemeLayout" />
+
+    <h2>Map on public invite</h2>
+    <div class="map-toggle" id="mapToggle">
+        <label class="@(Model.ShowMap ? "on" : "")" for="showMapTrue">
+            <input type="radio" id="showMapTrue" name="ShowMap" value="true" @(Model.ShowMap ? "checked" : null) /> Show map
+        </label>
+        <label class="@(!Model.ShowMap ? "on" : "")" for="showMapFalse">
+            <input type="radio" id="showMapFalse" name="ShowMap" value="false" @(!Model.ShowMap ? "checked" : null) /> Hide map
+        </label>
+    </div>
+    <p class="muted sm-text">When hidden, guests only see the venue address line instead of the map section. Choose <strong>Show map</strong>, fill map search, then <strong>Save changes</strong>.</p>
+
+    <div class="form-group">
+        <label asp-for="MapSearch">Map search (optional)</label>
+        <input asp-for="MapSearch" placeholder="12°00'49.0&quot;N 104°56'29.9&quot;E or venue address" />
+        <p class="muted sm-text">Use coordinates or an address for an exact pin.</p>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.MapSearch))
+    {
+        <div class="map-embed">
+            <iframe
+                title="Map preview"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="https://maps.google.com/maps?q=@mapQuery&z=15&output=embed"></iframe>
+            <a class="link-gold" href="https://www.google.com/maps/search/?api=1&query=@mapQuery" target="_blank" rel="noopener">Open in Google Maps</a>
+        </div>
+    }
+
+    <div class="invite-form-grid">
+        <div class="form-group span-2">
+            <label asp-for="InviteMessage">Message</label>
+            <textarea asp-for="InviteMessage" rows="3"></textarea>
+        </div>
+
+        <div class="form-group image-or-url">
+            <label>Cover image</label>
+            <p class="muted sm-text">Upload a file <strong>or</strong> paste an image URL. Max ~900KB.</p>
+            @if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl) && !Model.CoverImageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="image-or-url-preview">
+                    <img src="@Model.CoverImageUrl" alt="Cover preview" />
+                </div>
+            }
+            <input type="file" name="coverImageFile" accept="image/png,image/jpeg,image/webp" />
+            <div class="image-or-url-or">or paste URL</div>
+            <input asp-for="CoverImageUrl" type="text" placeholder="https://… or leave blank after upload" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="MusicUrl">Music (optional)</label>
+            <input asp-for="MusicUrl" placeholder="https://open.spotify.com/track/... or playlist URL" />
+            <p class="muted sm-text">Spotify embeds; other links show Listen.</p>
+        </div>
+    </div>
+
+    <hr class="invite-divider" />
+
+    <h2>Site &amp; share details</h2>
+    <div class="invite-form-grid">
+        <div class="form-group">
+            <label asp-for="SiteTitle">Site title</label>
+            <input asp-for="SiteTitle" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Slug">URL slug</label>
+            <input asp-for="Slug" />
+        </div>
+        <div class="form-group">
+            <label asp-for="WelcomeMessage">Welcome message</label>
+            <textarea asp-for="WelcomeMessage" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="ShareDescription">Share description (for friends)</label>
+            <textarea asp-for="ShareDescription" rows="2"></textarea>
+        </div>
+
+        <div class="form-group image-or-url">
+            <label>Share image</label>
+            <p class="muted sm-text">Link preview image. Upload <strong>or</strong> paste URL. Empty = cover.</p>
+            @if (!string.IsNullOrWhiteSpace(Model.ShareImageUrl) && !Model.ShareImageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="image-or-url-preview">
+                    <img src="@Model.ShareImageUrl" alt="Share preview" />
+                </div>
+            }
+            <input type="file" name="shareImageFile" accept="image/png,image/jpeg,image/webp" />
+            <div class="image-or-url-or">or paste URL</div>
+            <input asp-for="ShareImageUrl" type="text" placeholder="https://… or leave blank after upload" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="RsvpUrl">RSVP link</label>
+            <input asp-for="RsvpUrl" />
+            <div class="form-group" style="margin:0.85rem 0 0;">
+                <label><input asp-for="IsPublished" /> Published (friends can open the public link)</label>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn-invite-primary">Save changes</button>
+</form>
+
+@if (Model.IsPublished && !string.IsNullOrWhiteSpace(publicUrl))
+{
+    <section class="invite-admin-card">
+        <h2>Link preview (what friends see)</h2>
+        <div class="og-preview-card">
+            @{
+                var img = !string.IsNullOrWhiteSpace(Model.ShareImageUrl) ? Model.ShareImageUrl : Model.CoverImageUrl;
+            }
+            @if (!string.IsNullOrWhiteSpace(img))
+            {
+                <div class="og-preview-image" style="background-image:url('@img')"></div>
+            }
+            else
+            {
+                <div class="og-preview-image placeholder">Add a cover / share image for photo preview</div>
+            }
+            <div class="og-preview-body">
+                <div class="og-preview-domain">@Context.Request.Host.Value</div>
+                <div class="og-preview-title">@Model.SiteTitle</div>
+                <div class="og-preview-desc">@(shareDesc ?? "You're invited.")</div>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:1rem;">
+            <input id="publicShareUrl" readonly value="@publicUrl" onclick="this.select()" />
+        </div>
+        <button type="button" class="btn-outline" onclick="navigator.clipboard.writeText(document.getElementById('publicShareUrl').value)">Copy link</button>
+    </section>
+}
+
+@{
+    var rsvps = ViewBag.Rsvps as IEnumerable<WebsiteRsvp> ?? Enumerable.Empty<WebsiteRsvp>();
+}
+<section class="invite-admin-card">
+    <h2>RSVP replies</h2>
+    <p class="muted">Guests send these from the public invite. Replies also update Guest Management.</p>
+    @if (!rsvps.Any())
+    {
+        <p class="muted">No RSVPs yet.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Reply</th>
+                        <th>Message</th>
+                        <th>Dietary</th>
+                        <th>When</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var r in rsvps)
+                {
+                    var replyLabel = r.Reply switch
+                    {
+                        RsvpStatus.Accepted => "Joyfully accepts",
+                        RsvpStatus.Declined => "Regretfully declines",
+                        RsvpStatus.Maybe => "Not sure yet",
+                        _ => r.Reply.ToString()
+                    };
+                    <tr>
+                        <td>
+                            <strong>@r.FullName</strong>
+                            <div class="muted sm-text">@(r.Email ?? "—")</div>
+                        </td>
+                        <td>@replyLabel</td>
+                        <td>@(string.IsNullOrWhiteSpace(r.Message) ? "—" : r.Message)</td>
+                        <td>@(string.IsNullOrWhiteSpace(r.DietaryNotes) ? "—" : r.DietaryNotes)</td>
+                        <td>@r.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+</div>
+
+<script>
+(function () {
+    var root = document.getElementById('mapToggle');
+    if (!root) return;
+    root.querySelectorAll('input[type=radio]').forEach(function (input) {
+        input.addEventListener('change', function () {
+            root.querySelectorAll('label').forEach(function (label) {
+                label.classList.toggle('on', label.querySelector('input') === input && input.checked);
+            });
+        });
+    });
+})();
+</script>
+
