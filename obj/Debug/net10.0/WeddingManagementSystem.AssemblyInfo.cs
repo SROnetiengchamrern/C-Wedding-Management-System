@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WeddingManagementSystem")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+925ebede70e5c3c228053e3491ed2ecf7013d8a1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c93c9b970cd269d1c545ce79980b68617b0e3765")]
 [assembly: System.Reflection.AssemblyProductAttribute("WeddingManagementSystem")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WeddingManagementSystem")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -66,8 +66,87 @@
             background: var(--inv-bg);
             color: @(theme.Id == 3 ? "#f3eadc" : "#2c241c");
             min-height: 100vh;
+            position: relative;
         }
-        .inv-wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+        body.inv-loading {
+            overflow: hidden;
+        }
+        #heartBg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.35;
+            transition: opacity 0.8s ease;
+        }
+        body.inv-loading #heartBg {
+            z-index: 100;
+            opacity: 1;
+        }
+        #heartBg canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        #heartPathSvg {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .inv-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 99;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: radial-gradient(ellipse at center, #2a1520 0%, #12080c 70%);
+            color: #fff;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+        .inv-loader.is-done {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .inv-loader-title {
+            font-family: "Cormorant Garamond", serif;
+            font-size: clamp(1.6rem, 5vw, 2.4rem);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-align: center;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 101;
+            text-shadow: 0 4px 24px rgba(238, 82, 130, 0.45);
+        }
+        .inv-loader-sub {
+            font-size: 0.85rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            position: relative;
+            z-index: 101;
+        }
+        .inv-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s;
+        }
+        body.inv-ready .inv-wrap {
+            opacity: 1;
+            transform: none;
+        }
         .inv-hero {
             border-radius: 18px;
             overflow: hidden;
@@ -411,6 +490,13 @@
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease 0.25s;
+        }
+        body.inv-ready .inv-dock {
+            opacity: 1;
+            pointer-events: auto;
         }
         .inv-dock::-webkit-scrollbar { display: none; }
         .inv-dock a {
@@ -463,9 +549,75 @@
             .inv-dock { gap: .3rem; padding: .35rem .4rem; }
             .inv-dock a { padding: .42rem .72rem; font-size: .68rem; letter-spacing: .04em; }
         }
+
+        /* Falling hearts + soft snow */
+        #heartSnow {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        body.inv-ready #heartSnow { opacity: 1; }
+        .fall-item {
+            position: absolute;
+            top: -12vh;
+            left: 0;
+            will-change: transform, opacity;
+            animation-name: invFall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            user-select: none;
+        }
+        .fall-heart {
+            color: #ee5282;
+            font-size: 1rem;
+            text-shadow: 0 2px 8px rgba(238, 82, 130, 0.35);
+            line-height: 1;
+        }
+        .fall-heart.is-soft { color: #f7a0bc; opacity: 0.85; }
+        .fall-heart.is-deep { color: #d63a6a; }
+        .fall-snow {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+        }
+        .fall-snow.is-pink {
+            background: rgba(255, 190, 210, 0.85);
+            box-shadow: 0 0 8px rgba(238, 82, 130, 0.35);
+        }
+        @@keyframes invFall {
+            0% {
+                transform: translate3d(0, -10vh, 0) rotate(0deg);
+                opacity: 0;
+            }
+            8% { opacity: 1; }
+            92% { opacity: 0.9; }
+            100% {
+                transform: translate3d(var(--drift), 110vh, 0) rotate(var(--spin));
+                opacity: 0;
+            }
+        }
+        @@media (prefers-reduced-motion: reduce) {
+            #heartSnow { display: none; }
+        }
     </style>
 </head>
-<body>
+<body class="inv-loading">
+    <div class="inv-loader" id="invLoader" aria-live="polite">
+        <div class="inv-loader-title">@title</div>
+        <!-- <div class="inv-loader-sub">Loading invitation</div> -->
+    </div>
+    <div id="heartBg" aria-hidden="true"></div>
+    <div id="heartSnow" aria-hidden="true"></div>
+    <svg id="heartPathSvg" viewBox="0 0 600 552" aria-hidden="true">
+        <path id="heartPath" d="M300,107.77C284.68,55.67,239.76,0,162.31,0,64.83,0,0,82.08,0,171.71c0,.48,0,.95,0,1.43-.52,19.5,0,217.94,299.87,379.69v0l0,0,.05,0,0,0,0,0v0C600,391.08,600.48,192.64,600,173.14c0-.48,0-.95,0-1.43C600,82.08,535.17,0,437.69,0,360.24,0,315.32,55.67,300,107.77" fill="#ee5282"></path>
+    </svg>
+
     <div class="inv-wrap">
         <article class="inv-hero" id="home">
             @if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl ?? image))
@@ -778,6 +930,159 @@
                     targets.forEach(function (t) { dockIo.observe(t); });
                 }
             }
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script>
+        (function () {
+            var body = document.body;
+            var loader = document.getElementById('invLoader');
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            var finished = false;
+            var snowStarted = false;
+
+            function startHeartSnow() {
+                if (snowStarted) return;
+                snowStarted = true;
+                var layer = document.getElementById('heartSnow');
+                if (!layer || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+                var count = window.innerWidth < 700 ? 28 : 46;
+                var hearts = ['♥', '❤', '❥'];
+                layer.innerHTML = '';
+
+                for (var n = 0; n < count; n++) {
+                    var el = document.createElement('span');
+                    var isHeart = Math.random() > 0.38;
+                    el.className = 'fall-item ' + (isHeart ? 'fall-heart' : 'fall-snow');
+
+                    if (isHeart) {
+                        el.textContent = hearts[n % hearts.length];
+                        el.style.fontSize = (0.7 + Math.random() * 1.1) + 'rem';
+                        if (Math.random() > 0.55) el.classList.add('is-soft');
+                        else if (Math.random() > 0.7) el.classList.add('is-deep');
+                    } else {
+                        var flake = 3 + Math.random() * 6;
+                        el.style.width = flake + 'px';
+                        el.style.height = flake + 'px';
+                        if (Math.random() > 0.5) el.classList.add('is-pink');
+                    }
+
+                    el.style.left = (Math.random() * 100) + 'vw';
+                    el.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+                    el.style.setProperty('--spin', (Math.random() * 360 - 180) + 'deg');
+                    el.style.animationDuration = (7 + Math.random() * 10) + 's';
+                    el.style.animationDelay = (Math.random() * -14) + 's';
+                    el.style.opacity = String(0.45 + Math.random() * 0.5);
+                    layer.appendChild(el);
+                }
+            }
+
+            function finishLoading() {
+                if (finished) return;
+                finished = true;
+                if (loader) loader.classList.add('is-done');
+                body.classList.remove('inv-loading');
+                body.classList.add('inv-ready');
+                startHeartSnow();
+            }
+
+            if (reduceMotion || typeof THREE === 'undefined' || typeof gsap === 'undefined') {
+                finishLoading();
+                return;
+            }
+
+            var host = document.getElementById('heartBg');
+            var path = document.getElementById('heartPath');
+            if (!host || !path || !path.getTotalLength) {
+                finishLoading();
+                return;
+            }
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+            camera.position.z = 500;
+
+            var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            host.appendChild(renderer.domElement);
+
+            var length = path.getTotalLength();
+            var step = window.innerWidth < 700 ? 0.45 : 0.18;
+            var vertices = [];
+
+            for (var i = 0; i < length; i += step) {
+                var point = path.getPointAtLength(i);
+                var vector = new THREE.Vector3(point.x, -point.y, 0);
+                vector.x += (Math.random() - 0.5) * 30;
+                vector.y += (Math.random() - 0.5) * 30;
+                vector.z += (Math.random() - 0.5) * 70;
+                vertices.push(vector);
+            }
+
+            var geometry = new THREE.BufferGeometry().setFromPoints(vertices);
+            var material = new THREE.PointsMaterial({
+                color: 0xee5282,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                depthWrite: false,
+                size: window.innerWidth < 700 ? 2.2 : 3
+            });
+            var particles = new THREE.Points(geometry, material);
+            particles.position.x -= 600 / 2;
+            particles.position.y += 552 / 2;
+            scene.add(particles);
+
+            var tl = gsap.timeline({
+                onComplete: function () {
+                    setTimeout(finishLoading, 650);
+                    gsap.to(particles.scale, {
+                        x: 1.04, y: 1.04, z: 1.04,
+                        duration: 2.2,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: 'power1.inOut'
+                    });
+                }
+            });
+
+            for (var j = 0; j < vertices.length; j++) {
+                tl.from(vertices[j], {
+                    x: 600 / 2,
+                    y: -552 / 2,
+                    z: 0,
+                    ease: 'power2.out',
+                    duration: 'random(1.6, 3.2)'
+                }, j * step * 0.0015);
+            }
+
+            gsap.fromTo(scene.rotation, { y: -0.15 }, {
+                y: 0.15,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power2.inOut',
+                duration: 3
+            });
+
+            setTimeout(finishLoading, 5000);
+
+            function render() {
+                requestAnimationFrame(render);
+                geometry.setFromPoints(vertices);
+                renderer.render(scene, camera);
+            }
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            window.addEventListener('resize', onWindowResize, false);
+            requestAnimationFrame(render);
         })();
     </script>
     <input type="hidden" data-web="@(wedding?.WebId ?? 0)" data-partner="@(Model.Slug ?? "")" />
