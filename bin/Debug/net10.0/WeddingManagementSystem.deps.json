@@ -8,6 +8,8 @@
     ".NETCoreApp,Version=v10.0": {
       "WeddingManagementSystem/1.0.0": {
         "dependencies": {
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "10.0.12",
+          "Microsoft.AspNetCore.Identity.UI": "10.0.12",
           "Microsoft.EntityFrameworkCore.Design": "10.0.12",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.12"
         },
@@ -46,6 +48,28 @@
           "lib/net6.0/Humanizer.dll": {
             "assemblyVersion": "2.14.0.0",
             "fileVersion": "2.14.1.48190"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Identity.EntityFrameworkCore/10.0.12": {
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.12"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": {
+            "assemblyVersion": "10.0.12.0",
+            "fileVersion": "10.0.1226.42308"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Identity.UI/10.0.12": {
+        "dependencies": {
+          "Microsoft.Extensions.FileProviders.Embedded": "10.0.12"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.Identity.UI.dll": {
+            "assemblyVersion": "10.0.12.0",
+            "fileVersion": "10.0.1226.42308"
           }
         }
       },
@@ -500,6 +524,14 @@
           }
         }
       },
+      "Microsoft.Extensions.FileProviders.Embedded/10.0.12": {
+        "runtime": {
+          "lib/net10.0/Microsoft.Extensions.FileProviders.Embedded.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.1226.42308"
+          }
+        }
+      },
       "Microsoft.Identity.Client/4.84.2": {
         "dependencies": {
           "Microsoft.IdentityModel.Abstractions": "8.14.0"
@@ -821,6 +853,20 @@
       "path": "humanizer.core/2.14.1",
       "hashPath": "humanizer.core.2.14.1.nupkg.sha512"
     },
+    "Microsoft.AspNetCore.Identity.EntityFrameworkCore/10.0.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7W/9vKC65y41W6JXwC6WSU++D43wY/ANhrm7tJdbm2lrbzNkYClja6uL3Cg69y+PJ1Q4nARb3eWs9PNMWCdYxQ==",
+      "path": "microsoft.aspnetcore.identity.entityframeworkcore/10.0.12",
+      "hashPath": "microsoft.aspnetcore.identity.entityframeworkcore.10.0.12.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Identity.UI/10.0.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Idj+I+siXCFza3XU48d0P8e0IwRPRKvevp9HbA31AJsof51mH+qhgwtfkyEDXNpgA5ODdEMSw9fQahvot0G7cg==",
+      "path": "microsoft.aspnetcore.identity.ui/10.0.12",
+      "hashPath": "microsoft.aspnetcore.identity.ui.10.0.12.nupkg.sha512"
+    },
     "Microsoft.Bcl.AsyncInterfaces/8.0.0": {
       "type": "package",
       "serviceable": true,
@@ -925,6 +971,13 @@
       "sha512": "sha512-rDPQVTxh/zMTDF7wHlRqL/jjZbwjAP6315ydBxj51pZW7qkAwGwjoSiMutxYI91xmOE3ZXjAGHbYRqzyJV7Urw==",
       "path": "microsoft.extensions.dependencymodel/10.0.12",
       "hashPath": "microsoft.extensions.dependencymodel.10.0.12.nupkg.sha512"
+    },
+    "Microsoft.Extensions.FileProviders.Embedded/10.0.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-u9y/tTPnkv+lsIqN4NRjhzh5XGv7pPCXjPEdbYVK9daidg+xFFEHv//gTlrjZJAKLMcHbArnCU/wVl0KrPJEJA==",
+      "path": "microsoft.extensions.fileproviders.embedded/10.0.12",
+      "hashPath": "microsoft.extensions.fileproviders.embedded.10.0.12.nupkg.sha512"
     },
     "Microsoft.Identity.Client/4.84.2": {
       "type": "package",

@@ -13,24 +13,50 @@ public class GiftsController : Controller
 
     public GiftsController(ApplicationDbContext db) => _db = db;
 
-    public async Task<IActionResult> Index(string? search, int? editId)
+    public async Task<IActionResult> Index()
     {
-        // Always load full list so DataTables can filter Khmer/English client-side.
-        var gifts = await FilterGifts(null);
+        var rows = await _db.Weddings
+            .OrderBy(w => w.WebId)
+            .Select(w => new GiftPartnerListItem
+            {
+                WeddingId = w.Id,
+                WebId = w.WebId,
+                CoupleName = w.Partner1Name + " & " + w.Partner2Name,
+                WeddingDate = w.WeddingDate,
+                VenueName = w.VenueName,
+                GiftCount = w.WeddingGifts.Count,
+                TotalKhr = w.WeddingGifts.Sum(g => (decimal?)g.AmountKhr) ?? 0,
+                TotalUsd = w.WeddingGifts.Sum(g => (decimal?)g.AmountUsd) ?? 0
+            })
+            .ToListAsync();
+
+        return View(rows);
+    }
+
+    public async Task<IActionResult> Manage(int weddingId, string? search, int? editId)
+    {
+        var wedding = await _db.Weddings.AsNoTracking().FirstOrDefaultAsync(w => w.Id == weddingId);
+        if (wedding is null) return NotFound();
+
+        var gifts = await FilterGifts(weddingId, null);
         WeddingGift form;
 
         if (editId is > 0)
         {
-            form = await _db.WeddingGifts.AsNoTracking().FirstOrDefaultAsync(g => g.Id == editId)
-                   ?? new WeddingGift { GiftDate = DateTime.Today };
+            form = await _db.WeddingGifts.AsNoTracking()
+                       .FirstOrDefaultAsync(g => g.Id == editId && g.WeddingId == weddingId)
+                   ?? new WeddingGift { GiftDate = DateTime.Today, WeddingId = weddingId };
         }
         else
         {
-            form = new WeddingGift { GiftDate = DateTime.Today };
+            form = new WeddingGift { GiftDate = DateTime.Today, WeddingId = weddingId };
         }
 
         return View(new GiftMoneyViewModel
         {
+            WeddingId = wedding.Id,
+            WebId = wedding.WebId,
+            CoupleName = wedding.CoupleDisplayName,
             Form = form,
             Gifts = gifts,
             Search = search
@@ -39,10 +65,9 @@ public class GiftsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Add([Bind(Prefix = "Form")] WeddingGift form, string? search)
+    public async Task<IActionResult> Add(int weddingId, [Bind(Prefix = "Form")] WeddingGift form, string? search)
     {
-        var weddingId = await _db.GetCurrentWeddingIdAsync();
-        if (weddingId is null)
+        if (!await _db.Weddings.AnyAsync(w => w.Id == weddingId))
             return RedirectToAction(nameof(Index));
 
         ClearGiftNavState();
@@ -50,41 +75,41 @@ public class GiftsController : Controller
         if (string.IsNullOrWhiteSpace(form.GuestName))
         {
             TempData["Error"] = "Guest name is required. You can type English or Khmer.";
-            return RedirectToAction(nameof(Index), new { search });
+            return RedirectToAction(nameof(Manage), new { weddingId, search });
         }
 
         Normalize(form);
         form.Id = 0;
-        form.WeddingId = weddingId.Value;
+        form.WeddingId = weddingId;
         form.Wedding = null!;
 
         _db.WeddingGifts.Add(form);
         await _db.SaveChangesAsync();
 
         TempData["Ok"] = "Guest gift saved.";
-        return RedirectToAction(nameof(Index), new { search });
+        return RedirectToAction(nameof(Manage), new { weddingId, search });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update([Bind(Prefix = "Form")] WeddingGift form, string? search)
+    public async Task<IActionResult> Update(int weddingId, [Bind(Prefix = "Form")] WeddingGift form, string? search)
     {
         ClearGiftNavState();
 
         if (form.Id <= 0)
-            return RedirectToAction(nameof(Index), new { search });
+            return RedirectToAction(nameof(Manage), new { weddingId, search });
 
         if (string.IsNullOrWhiteSpace(form.GuestName))
         {
             TempData["Error"] = "Guest name is required. You can type English or Khmer.";
-            return RedirectToAction(nameof(Index), new { search, editId = form.Id });
+            return RedirectToAction(nameof(Manage), new { weddingId, search, editId = form.Id });
         }
 
-        var existing = await _db.WeddingGifts.FindAsync(form.Id);
+        var existing = await _db.WeddingGifts.FirstOrDefaultAsync(g => g.Id == form.Id && g.WeddingId == weddingId);
         if (existing is null)
         {
             TempData["Error"] = "Guest not found.";
-            return RedirectToAction(nameof(Index), new { search });
+            return RedirectToAction(nameof(Manage), new { weddingId, search });
         }
 
         Normalize(form);
@@ -98,26 +123,29 @@ public class GiftsController : Controller
 
         await _db.SaveChangesAsync();
         TempData["Ok"] = "Guest gift updated.";
-        return RedirectToAction(nameof(Index), new { search });
+        return RedirectToAction(nameof(Manage), new { weddingId, search });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(int id, string? search)
+    public async Task<IActionResult> Delete(int id, int weddingId, string? search)
     {
-        var gift = await _db.WeddingGifts.FindAsync(id);
+        var gift = await _db.WeddingGifts.FirstOrDefaultAsync(g => g.Id == id && g.WeddingId == weddingId);
         if (gift is not null)
         {
             _db.WeddingGifts.Remove(gift);
             await _db.SaveChangesAsync();
             TempData["Ok"] = "Guest removed.";
         }
-        return RedirectToAction(nameof(Index), new { search });
+        return RedirectToAction(nameof(Manage), new { weddingId, search });
     }
 
-    public async Task<IActionResult> ExportExcel(string? search)
+    public async Task<IActionResult> ExportExcel(int weddingId, string? search)
     {
-        var gifts = await FilterGifts(search);
+        var wedding = await _db.Weddings.AsNoTracking().FirstOrDefaultAsync(w => w.Id == weddingId);
+        if (wedding is null) return NotFound();
+
+        var gifts = await FilterGifts(weddingId, search);
         var sb = new StringBuilder();
         sb.AppendLine("No,Guest,Amount KHR,Amount USD,Address,Relationship,Gift Date,Notes");
         var i = 1;
@@ -135,12 +163,18 @@ public class GiftsController : Controller
         }
 
         var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
-        return File(bytes, "text/csv", $"wedding-gifts-{DateTime.Today:yyyyMMdd}.csv");
+        var slug = $"{wedding.Partner1Name}-{wedding.Partner2Name}".ToLowerInvariant().Replace(' ', '-');
+        return File(bytes, "text/csv", $"wedding-gifts-{slug}-{DateTime.Today:yyyyMMdd}.csv");
     }
 
-    public async Task<IActionResult> ExportPdf(string? search)
+    public async Task<IActionResult> ExportPdf(int weddingId, string? search)
     {
-        var gifts = await FilterGifts(search);
+        var wedding = await _db.Weddings.AsNoTracking().FirstOrDefaultAsync(w => w.Id == weddingId);
+        if (wedding is null) return NotFound();
+
+        var gifts = await FilterGifts(weddingId, search);
+        ViewBag.CoupleName = wedding.CoupleDisplayName;
+        ViewBag.WebId = wedding.WebId;
         return View(gifts);
     }
 
@@ -162,12 +196,11 @@ public class GiftsController : Controller
             form.GiftDate = DateTime.Today;
     }
 
-    private async Task<List<WeddingGift>> FilterGifts(string? search)
+    private async Task<List<WeddingGift>> FilterGifts(int weddingId, string? search)
     {
-        var query = _db.WeddingGifts.AsQueryable();
+        var query = _db.WeddingGifts.Where(g => g.WeddingId == weddingId);
         if (!string.IsNullOrWhiteSpace(search))
         {
-            // Unicode-safe LIKE for Khmer + English (nvarchar).
             var term = EscapeLike(search.Trim());
             var pattern = $"%{term}%";
             query = query.Where(g =>

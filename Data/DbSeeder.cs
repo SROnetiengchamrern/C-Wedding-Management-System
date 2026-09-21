@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using WeddingManagementSystem.Models;
 
 namespace WeddingManagementSystem.Data;
@@ -540,6 +542,25 @@ public static class DbSeeder
         }
         if (missing.Count > 0)
             await db.SaveChangesAsync();
+    }
+
+    public static async Task SeedAdminUserAsync(IServiceProvider services)
+    {
+        var users = services.GetRequiredService<UserManager<AppUser>>();
+        const string email = "admin@wedding.local";
+        const string password = "Admin123!";
+
+        var existing = await users.FindByEmailAsync(email);
+        if (existing is not null) return;
+
+        var admin = new AppUser
+        {
+            UserName = email,
+            Email = email,
+            DisplayName = "Wedding Admin",
+            EmailConfirmed = true
+        };
+        await users.CreateAsync(admin, password);
     }
 
     private static List<WeddingGift> CreateSampleGifts(int weddingId)

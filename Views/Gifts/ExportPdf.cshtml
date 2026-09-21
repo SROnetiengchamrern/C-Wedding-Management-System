@@ -25,6 +25,10 @@
 <body>
     <button class="no-print" onclick="window.print()" style="margin-bottom:12px;padding:8px 14px;">Print / Save as PDF</button>
     <h1>Wedding Gift / Money Management</h1>
+    @if (ViewBag.CoupleName is string couple)
+    {
+        <p style="text-align:center;margin-top:-8px;">@couple @if (ViewBag.WebId is int webId) { <span>· web_id: @webId</span> }</p>
+    }
     <div class="sums">
         <div>Guests: <strong>@Model.Count</strong></div>
         <div>KHR: <strong>@totalKhr.ToString("N0")</strong> ៛</div>

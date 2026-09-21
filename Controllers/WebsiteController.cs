@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WeddingManagementSystem.Data;
@@ -336,6 +337,7 @@ public class WebsiteController : Controller
         return View("Public", settings);
     }
 
+    [AllowAnonymous]
     [HttpGet("/w/{slug}")]
     public async Task<IActionResult> Public(string slug)
     {
@@ -352,6 +354,7 @@ public class WebsiteController : Controller
         return View(settings);
     }
 
+    [AllowAnonymous]
     [HttpPost("/w/{slug}/rsvp")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SubmitRsvp(

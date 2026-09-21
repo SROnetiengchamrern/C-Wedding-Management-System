@@ -1,222 +1,49 @@
-@model WeddingManagementSystem.ViewModels.GiftMoneyViewModel
+@model List<WeddingManagementSystem.ViewModels.GiftPartnerListItem>
 @{
-    ViewData["Title"] = "Wedding Gift Money";
-    var isEdit = Model.IsEditing;
+    ViewData["Title"] = "Gift Money";
+    var n = 1;
 }
 
-<link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-
-<div class="gift-page">
-    <h1 class="gift-title">Wedding Gift / Money Management</h1>
-    <p class="gift-subtitle">Type guest details in <strong>English</strong> or <strong>ខ្មែរ (Khmer)</strong> — both are supported.</p>
-
-    @if (TempData["Ok"] is string ok)
-    {
-        <div class="info-banner">@ok</div>
-    }
-    @if (TempData["Error"] is string err)
-    {
-        <div class="info-banner" style="background:#fde8e8;border-color:#f0b4b4;color:#8a1f1f;">@err</div>
-    }
-
-    <div class="gift-layout">
-        <section class="gift-form-panel @(isEdit ? "editing" : "")">
-            <h2>@(isEdit ? "Edit Guest Information" : "Enter Guest Information")</h2>
-            <form asp-action="@(isEdit ? "Update" : "Add")" method="post" class="gift-form" accept-charset="utf-8">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="search" value="@Model.Search" />
-                <input type="hidden" asp-for="Form.Id" />
-
-                <div class="form-group">
-                    <label asp-for="Form.GuestName">Guest name</label>
-                    <input asp-for="Form.GuestName" autofocus lang="km" class="bilingual"
-                           placeholder="e.g. Sokha or សុខា" />
-                    <span asp-validation-for="Form.GuestName" class="field-error"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Form.AmountKhr">Amount (KHR ៛)</label>
-                    <input asp-for="Form.AmountKhr" type="number" step="1000" min="0" />
-                </div>
-                <div class="form-group">
-                    <label asp-for="Form.AmountUsd">Amount (USD $)</label>
-                    <input asp-for="Form.AmountUsd" type="number" step="1" min="0" />
-                </div>
-                <div class="form-group">
-                    <label asp-for="Form.Address">Address</label>
-                    <input asp-for="Form.Address" lang="km" class="bilingual"
-                           placeholder="e.g. Phnom Penh or ភ្នំពេញ" />
-                </div>
-                <div class="form-group">
-                    <label asp-for="Form.Relationship">Relationship</label>
-                    <input asp-for="Form.Relationship" list="relationship-list" lang="km" class="bilingual"
-                           placeholder="e.g. Friend or មិត្តភក្តិ" />
-                    <datalist id="relationship-list">
-                        <option value="Family"></option>
-                        <option value="Friend"></option>
-                        <option value="Colleague"></option>
-                        <option value="Neighbor"></option>
-                        <option value="Cousin"></option>
-                        <option value="Uncle"></option>
-                        <option value="Aunt"></option>
-                        <option value="Other"></option>
-                        <option value="គ្រួសារ"></option>
-                        <option value="មិត្តភក្តិ"></option>
-                        <option value="មិត្តរួមការងារ"></option>
-                    </datalist>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Form.GiftDate">Gift date</label>
-                    <input asp-for="Form.GiftDate" type="date" />
-                </div>
-                <div class="form-group">
-                    <label asp-for="Form.Notes">Notes</label>
-                    <input asp-for="Form.Notes" lang="km" class="bilingual"
-                           placeholder="English or ខ្មែរ" />
-                </div>
-
-                <div class="gift-actions sticky-actions @(isEdit ? "edit-mode" : "")">
-                    @if (isEdit)
-                    {
-                        <button type="submit" class="btn-gift update">Update guest</button>
-                        <a class="btn-gift cancel" asp-action="Index" asp-route-search="@Model.Search">Cancel</a>
-                    }
-                    else
-                    {
-                        <button type="submit" class="btn-gift add">Add guest</button>
-                    }
-                </div>
-            </form>
-
-            <form id="giftClientSearch" class="gift-search-bar" accept-charset="utf-8" onsubmit="return false;">
-                <input id="giftSearchInput" type="search" value="@Model.Search" lang="km" class="bilingual"
-                       placeholder="Search English or ខ្មែរ…" autocomplete="off" />
-                <button type="button" id="giftSearchBtn" class="btn-gift search">Search</button>
-            </form>
-
-            <div class="qr-row">
-                <div class="qr-box">
-                    <div class="qr-placeholder">QR</div>
-                    <span>QR · KHR</span>
-                </div>
-                <div class="qr-box">
-                    <div class="qr-placeholder">QR</div>
-                    <span>QR · USD</span>
-                </div>
-            </div>
-        </section>
-
-        <section class="gift-table-panel">
-            <div class="gift-summary">
-                <div class="sum-box guests">Guests <strong>@Model.TotalGuests</strong></div>
-                <div class="sum-box khr">KHR <strong>@Model.TotalKhr.ToString("N0")</strong> ៛</div>
-                <div class="sum-box usd">USD <strong>@Model.TotalUsd.ToString("N0")</strong> $</div>
-                <div class="export-btns">
-                    <a class="btn-export" asp-action="ExportPdf" asp-route-search="@Model.Search" target="_blank">PDF</a>
-                    <a class="btn-export xlsx" asp-action="ExportExcel" asp-route-search="@Model.Search">XLSX</a>
-                </div>
-            </div>
-
-            <div class="gift-table-wrap">
-                <table id="giftsDataTable" class="gift-table display nowrap" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Guest</th>
-                            <th>KHR</th>
-                            <th>USD</th>
-                            <th>Address</th>
-                            <th>Relationship</th>
-                            <th>Date</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @{ var n = 1; }
-                    @foreach (var g in Model.Gifts)
-                    {
-                        <tr class="@(Model.Form.Id == g.Id ? "row-editing" : "")">
-                            <td>@n</td>
-                            <td class="bilingual" data-search="@g.GuestName"><strong>@g.GuestName</strong></td>
-                            <td data-order="@g.AmountKhr">@(g.AmountKhr > 0 ? $"{g.AmountKhr:N0} ៛" : "")</td>
-                            <td data-order="@g.AmountUsd">@(g.AmountUsd > 0 ? $"{g.AmountUsd:N0} $" : "")</td>
-                            <td class="bilingual" data-search="@g.Address">@g.Address</td>
-                            <td class="bilingual" data-search="@g.Relationship">@g.Relationship</td>
-                            <td data-order="@g.GiftDate.ToString("yyyyMMdd")">@g.GiftDate.ToString("MMM d, yyyy")</td>
-                            <td class="bilingual" data-search="@g.Notes">@g.Notes</td>
-                            <td class="gift-row-actions">
-                                <a class="btn-row edit"
-                                   asp-action="Index"
-                                   asp-route-editId="@g.Id"
-                                   asp-route-search="@Model.Search"
-                                   title="Edit">Edit</a>
-                                <form asp-action="Delete" method="post" class="inline-form">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@g.Id" />
-                                    <input type="hidden" name="search" value="@Model.Search" />
-                                    <button type="submit" class="btn-row delete" title="Delete">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                        n++;
-                    }
-                    </tbody>
-                </table>
-            </div>
-        </section>
+<div class="toolbar">
+    <div>
+        <h1 class="page-title">Gift Money</h1>
+        <p class="muted" style="margin:0;">Choose a couple to manage their wedding gift / money list.</p>
     </div>
 </div>
 
-@section Scripts {
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
-    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-    <script>
-        $(function () {
-            // Unicode/Khmer-friendly search (no smart tokenization that breaks Khmer)
-            var table = $('#giftsDataTable').DataTable({
-                pageLength: 10,
-                lengthMenu: [10, 25, 50, 100],
-                order: [[0, 'asc']],
-                search: {
-                    smart: false,
-                    regex: false,
-                    caseInsensitive: true
-                },
-                columnDefs: [
-                    { orderable: false, targets: 8 },
-                    { searchable: false, targets: 8 }
-                ],
-                language: {
-                    search: "Filter:",
-                    lengthMenu: "Show _MENU_ guests",
-                    info: "Showing _START_ to _END_ of _TOTAL_ guests",
-                    infoEmpty: "No guests",
-                    zeroRecords: "No matching guests found"
-                },
-                scrollX: true
-            });
+@if (TempData["Ok"] is string ok)
+{
+    <div class="info-banner">@ok</div>
+}
 
-            function runGiftSearch() {
-                var q = ($('#giftSearchInput').val() || '').trim();
-                table.search(q).draw();
-            }
-
-            $('#giftSearchBtn').on('click', runGiftSearch);
-            $('#giftSearchInput').on('keydown', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    runGiftSearch();
+<div class="wedding-site-list">
+@foreach (var w in Model)
+{
+    <a class="wedding-site-row wedding-site-link" asp-action="Manage" asp-route-weddingId="@w.WeddingId">
+        <span class="wedding-site-num">@n.</span>
+        <span class="wedding-site-main">
+            <strong>@w.CoupleName</strong>
+            <span class="muted sm-text">
+                @w.WeddingDate.ToString("MMM d, yyyy")
+                @if (!string.IsNullOrWhiteSpace(w.VenueName))
+                {
+                    <text> · @w.VenueName</text>
                 }
-            });
-            // Live filter while typing (works for Khmer IME after character commits)
-            $('#giftSearchInput').on('input', function () {
-                runGiftSearch();
-            });
+            </span>
+            <span class="muted sm-text">web_id: @w.WebId</span>
+            <span class="muted sm-text">
+                Guests @w.GiftCount · KHR @w.TotalKhr.ToString("N0") ៛ · USD @w.TotalUsd.ToString("N0") $
+            </span>
+        </span>
+        <span class="wedding-site-arrow">Open →</span>
+    </a>
+    n++;
+}
+</div>
 
-            var initial = ($('#giftSearchInput').val() || '').trim();
-            if (initial) {
-                table.search(initial).draw();
-            }
-        });
-    </script>
+@if (!Model.Any())
+{
+    <div class="invite-admin-card" style="margin-top:1rem;">
+        <p class="muted" style="margin:0;">No partners yet. Add a couple under Wedding Website first.</p>
+    </div>
 }

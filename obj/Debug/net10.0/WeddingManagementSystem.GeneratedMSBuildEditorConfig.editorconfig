@@ -31,6 +31,14 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
+[D:/CHAMRERN/WeddingManagementSystem/Views/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/CHAMRERN/WeddingManagementSystem/Views/Account/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/CHAMRERN/WeddingManagementSystem/Views/Agreements/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdyZWVtZW50c1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -69,6 +77,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/CHAMRERN/WeddingManagementSystem/Views/Gifts/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR2lmdHNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/CHAMRERN/WeddingManagementSystem/Views/Gifts/Manage.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR2lmdHNcTWFuYWdlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/CHAMRERN/WeddingManagementSystem/Views/Guests/Create.cshtml]

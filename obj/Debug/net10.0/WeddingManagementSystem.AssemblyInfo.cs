@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.AspNetCore.Identity.UI.UIFrameworkAttribute("Bootstrap5")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("WeddingManagementSystem")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0f4be35a78410544df969fdd25641356ca2ae0b1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+da936343ae581258944ebd89a6eecb5000745ed2")]
 [assembly: System.Reflection.AssemblyProductAttribute("WeddingManagementSystem")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WeddingManagementSystem")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
