@@ -19,24 +19,24 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Web ID</th>
+                <th class="col-id">Web ID</th>
                 <th>Couple</th>
-                <th>Date</th>
+                <th class="col-date">Date</th>
                 <th>Venue</th>
                 <th>Location</th>
-                <th></th>
+                <th class="col-actions"></th>
             </tr>
         </thead>
         <tbody>
         @foreach (var w in Model)
         {
             <tr>
-                <td>@w.WebId</td>
-                <td><strong>@w.CoupleDisplayName</strong></td>
-                <td>@w.WeddingDate.ToString("MMM d, yyyy")</td>
+                <td class="col-id">@w.WebId</td>
+                <td class="col-couple"><strong>@w.CoupleDisplayName</strong></td>
+                <td class="col-date">@w.WeddingDate.ToString("MMM d, yyyy")</td>
                 <td>@(w.VenueName ?? "—")</td>
                 <td>@(w.VenueLocation ?? "—")</td>
-                <td class="actions">
+                <td class="col-actions">
                     <a class="btn-outline btn-sm" asp-action="Edit" asp-route-id="@w.Id">Edit</a>
                 </td>
             </tr>

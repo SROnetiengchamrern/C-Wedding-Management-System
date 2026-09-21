@@ -316,62 +316,93 @@
 <section class="invite-admin-card">
     <h2>RSVP replies</h2>
     <p class="muted">Guests send these from the public invite. Replies also update Guest Management.</p>
-    @if (!rsvps.Any())
-    {
-        <p class="muted">No RSVPs yet.</p>
-    }
-    else
-    {
-        <div class="table-wrap">
-            <table class="data">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Reply</th>
-                        <th>Message</th>
-                        <th>Dietary</th>
-                        <th>When</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var r in rsvps)
+    <div class="rsvp-table-wrap">
+        <table id="rsvpDataTable" class="rsvp-table display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Reply</th>
+                    <th>Message</th>
+                    <th>Dietary</th>
+                    <th>When</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var r in rsvps)
+            {
+                var replyLabel = r.Reply switch
                 {
-                    var replyLabel = r.Reply switch
-                    {
-                        RsvpStatus.Accepted => "Joyfully accepts",
-                        RsvpStatus.Declined => "Regretfully declines",
-                        RsvpStatus.Maybe => "Not sure yet",
-                        _ => r.Reply.ToString()
-                    };
-                    <tr>
-                        <td>
-                            <strong>@r.FullName</strong>
-                            <div class="muted sm-text">@(r.Email ?? "—")</div>
-                        </td>
-                        <td>@replyLabel</td>
-                        <td>@(string.IsNullOrWhiteSpace(r.Message) ? "—" : r.Message)</td>
-                        <td>@(string.IsNullOrWhiteSpace(r.DietaryNotes) ? "—" : r.DietaryNotes)</td>
-                        <td>@r.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
+                    RsvpStatus.Accepted => "Joyfully accepts",
+                    RsvpStatus.Declined => "Regretfully declines",
+                    RsvpStatus.Maybe => "Not sure yet",
+                    _ => r.Reply.ToString()
+                };
+                var replyClass = r.Reply switch
+                {
+                    RsvpStatus.Accepted => "rsvp-pill accept",
+                    RsvpStatus.Declined => "rsvp-pill decline",
+                    RsvpStatus.Maybe => "rsvp-pill maybe",
+                    _ => "rsvp-pill"
+                };
+                <tr>
+                    <td data-search="@(r.FullName) @(r.Email)">
+                        <strong>@r.FullName</strong>
+                        <div class="muted sm-text">@(r.Email ?? "—")</div>
+                    </td>
+                    <td><span class="@replyClass">@replyLabel</span></td>
+                    <td class="rsvp-msg">@(string.IsNullOrWhiteSpace(r.Message) ? "—" : r.Message)</td>
+                    <td class="rsvp-msg">@(string.IsNullOrWhiteSpace(r.DietaryNotes) ? "—" : r.DietaryNotes)</td>
+                    <td data-order="@r.CreatedAt.Ticks" class="rsvp-when">@r.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 </section>
 </div>
 
-<script>
-(function () {
-    var root = document.getElementById('mapToggle');
-    if (!root) return;
-    root.querySelectorAll('input[type=radio]').forEach(function (input) {
-        input.addEventListener('change', function () {
-            root.querySelectorAll('label').forEach(function (label) {
-                label.classList.toggle('on', label.querySelector('input') === input && input.checked);
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script>
+        (function () {
+            var root = document.getElementById('mapToggle');
+            if (root) {
+                root.querySelectorAll('input[type=radio]').forEach(function (input) {
+                    input.addEventListener('change', function () {
+                        root.querySelectorAll('label').forEach(function (label) {
+                            label.classList.toggle('on', label.querySelector('input') === input && input.checked);
+                        });
+                    });
+                });
+            }
+        })();
+
+        $(function () {
+            $('#rsvpDataTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                order: [[4, 'desc']],
+                autoWidth: false,
+                search: {
+                    smart: false,
+                    regex: false,
+                    caseInsensitive: true
+                },
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_",
+                    info: "_START_–_END_ of _TOTAL_",
+                    infoEmpty: "No RSVPs yet",
+                    zeroRecords: "No matching RSVPs",
+                    emptyTable: "No RSVPs yet",
+                    paginate: { previous: "‹", next: "›" }
+                },
+                columnDefs: [
+                    { targets: [2, 3], className: 'rsvp-msg' }
+                ]
             });
         });
-    });
-})();
-</script>
+    </script>
+}
 

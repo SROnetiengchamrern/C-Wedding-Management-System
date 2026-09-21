@@ -1,0 +1,117 @@
+@model WeddingManagementSystem.ViewModels.GiftTotalsPageViewModel
+@{
+    ViewData["Title"] = "Gift Totals";
+    var s = Model.Selected;
+}
+
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Gift Totals</h1>
+        <p class="page-lead">Guest count and gift money totals for each partner.</p>
+    </div>
+</div>
+
+@if (Model.Partners.Count == 0 || s is null)
+{
+    <div class="info-banner">No couples yet. Add a couple first.</div>
+}
+else
+{
+    <section class="totals-panel">
+        <form method="get" asp-action="Index" class="totals-partner-bar" id="totalsPartnerForm">
+            <label for="webId">Partner</label>
+            <select id="webId" name="webId" onchange="this.form.submit()">
+                @foreach (var p in Model.Partners)
+                {
+                    if (p.WebId == Model.SelectedWebId)
+                    {
+                        <option value="@p.WebId" selected>web_id @p.WebId — @p.CoupleName</option>
+                    }
+                    else
+                    {
+                        <option value="@p.WebId">web_id @p.WebId — @p.CoupleName</option>
+                    }
+                }
+            </select>
+        </form>
+
+        <div class="totals-meta">
+            <strong>@s.CoupleName</strong>
+            <span class="muted"> · web_id @s.WebId</span>
+            <span class="muted"> · @s.WeddingDate.ToString("MMM d, yyyy")</span>
+            @if (!string.IsNullOrWhiteSpace(s.VenueName))
+            {
+                <span class="muted"> · @s.VenueName</span>
+            }
+        </div>
+
+        <div class="totals-cards">
+            <article class="totals-card guests">
+                <span class="totals-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <div class="totals-card-body">
+                    <span class="totals-card-label">Guests</span>
+                    <strong class="totals-card-value">@s.GiftCount</strong>
+                </div>
+            </article>
+
+            <article class="totals-card khr">
+                <span class="totals-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/><path d="M9.5 15.5c.8.8 1.9 1.2 3 1.2s2.2-.4 3-1.2"/></svg>
+                </span>
+                <div class="totals-card-body">
+                    <span class="totals-card-label">KHR</span>
+                    <strong class="totals-card-value">@s.TotalKhr.ToString("N0") <span class="totals-currency">៛</span></strong>
+                </div>
+            </article>
+
+            <article class="totals-card usd">
+                <span class="totals-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M14.5 9.5c0-1.1-1.1-2-2.5-2s-2.5.9-2.5 2 1.1 2 2.5 2 2.5.9 2.5 2-1.1 2-2.5 2-2.5-.9-2.5-2"/></svg>
+                </span>
+                <div class="totals-card-body">
+                    <span class="totals-card-label">USD</span>
+                    <strong class="totals-card-value">@s.TotalUsd.ToString("N0") <span class="totals-currency">$</span></strong>
+                </div>
+            </article>
+        </div>
+
+        <p class="totals-rate-note">Note: Khmer Riel exchange — <strong>$1 = @Model.ExchangeRate.ToString("N0") ៛</strong></p>
+
+        <div class="totals-cards totals-cards-combined">
+            <article class="totals-card combined-khr">
+                <span class="totals-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 12h16"/><path d="M12 4v16"/><circle cx="12" cy="12" r="9"/></svg>
+                </span>
+                <div class="totals-card-body">
+                    <span class="totals-card-label">KHR + USD (as Riel)</span>
+                    <strong class="totals-card-value">@s.CombinedKhr.ToString("N0") <span class="totals-currency">៛</span></strong>
+                    <span class="totals-card-hint">@s.TotalKhr.ToString("N0") ៛ + (@s.TotalUsd.ToString("N0") $ × @Model.ExchangeRate.ToString("N0"))</span>
+                </div>
+            </article>
+
+            <article class="totals-card combined-usd">
+                <span class="totals-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3v18"/><path d="M8 8h5.5a2.5 2.5 0 0 1 0 5H8"/><path d="M8 13h6a2.5 2.5 0 0 1 0 5H8"/></svg>
+                </span>
+                <div class="totals-card-body">
+                    <span class="totals-card-label">KHR + USD (as Dollar)</span>
+                    <strong class="totals-card-value">@s.CombinedUsd.ToString("N2") <span class="totals-currency">$</span></strong>
+                    <span class="totals-card-hint">@s.TotalUsd.ToString("N0") $ + (@s.TotalKhr.ToString("N0") ៛ ÷ @Model.ExchangeRate.ToString("N0"))</span>
+                </div>
+            </article>
+        </div>
+
+        <a class="totals-action-card" asp-controller="Gifts" asp-action="Manage" asp-route-weddingId="@s.WeddingId">
+            <span class="totals-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20 12v8H4v-8"/><path d="M2 7h20v5H2z"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            </span>
+            <span class="totals-action-text">
+                <strong>Open Gift Money</strong>
+                <span>View &amp; manage gifts for @s.CoupleName</span>
+            </span>
+            <span class="totals-action-arrow" aria-hidden="true">→</span>
+        </a>
+    </section>
+}

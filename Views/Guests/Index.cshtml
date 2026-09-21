@@ -14,28 +14,28 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Web ID</th>
+                <th class="col-id">Web ID</th>
                 <th>Couple</th>
-                <th>Date</th>
-                <th>Guests</th>
-                <th>Accepted</th>
-                <th>Pending</th>
-                <th>Declined</th>
-                <th></th>
+                <th class="col-date">Date</th>
+                <th class="col-num">Guests</th>
+                <th class="col-num">Accepted</th>
+                <th class="col-num">Pending</th>
+                <th class="col-num">Declined</th>
+                <th class="col-actions"></th>
             </tr>
         </thead>
         <tbody>
         @foreach (var row in Model)
         {
             <tr>
-                <td>@row.WebId</td>
-                <td><strong>@row.CoupleName</strong></td>
-                <td>@row.WeddingDate.ToString("MMM d, yyyy")</td>
-                <td>@row.GuestCount</td>
-                <td>@row.Accepted</td>
-                <td>@row.Pending</td>
-                <td>@row.Declined</td>
-                <td class="actions">
+                <td class="col-id">@row.WebId</td>
+                <td class="col-couple"><strong>@row.CoupleName</strong></td>
+                <td class="col-date">@row.WeddingDate.ToString("MMM d, yyyy")</td>
+                <td class="col-num">@row.GuestCount</td>
+                <td class="col-num ok">@row.Accepted</td>
+                <td class="col-num warn">@row.Pending</td>
+                <td class="col-num bad">@row.Declined</td>
+                <td class="col-actions">
                     <a class="btn-outline btn-sm" asp-action="Manage" asp-route-weddingId="@row.WeddingId">Manage</a>
                 </td>
             </tr>
