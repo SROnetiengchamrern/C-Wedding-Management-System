@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WeddingManagementSystem.Data;
 using WeddingManagementSystem.Models;
+using WeddingManagementSystem.Services;
 
 namespace WeddingManagementSystem.Controllers;
 
@@ -14,11 +15,13 @@ public class WebsiteController : Controller
 
     private readonly ApplicationDbContext _db;
     private readonly IWebHostEnvironment _env;
+    private readonly ITelegramAlertService _telegram;
 
-    public WebsiteController(ApplicationDbContext db, IWebHostEnvironment env)
+    public WebsiteController(ApplicationDbContext db, IWebHostEnvironment env, ITelegramAlertService telegram)
     {
         _db = db;
         _env = env;
+        _telegram = telegram;
     }
 
     public async Task<IActionResult> Index()
@@ -419,6 +422,22 @@ public class WebsiteController : Controller
         }
 
         await _db.SaveChangesAsync();
+
+        var wedding = await _db.Weddings.AsNoTracking()
+            .FirstOrDefaultAsync(w => w.Id == settings.WeddingId);
+        var coupleName = wedding?.CoupleDisplayName ?? settings.SiteTitle;
+        var webId = wedding?.WebId ?? 0;
+
+        await _telegram.SendRsvpAlertAsync(
+            coupleName,
+            webId,
+            slug,
+            fullName,
+            reply.ToString(),
+            email,
+            message,
+            dietaryNotes);
+
         TempData["RsvpOk"] = $"Thank you, {fullName} — your RSVP was sent.";
         return Redirect(SafeReturn(returnUrl, slug, settings.WeddingId));
     }

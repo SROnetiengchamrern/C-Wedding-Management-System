@@ -114,6 +114,108 @@
             font-size: 1.55rem;
             margin: 0 0 .75rem;
         }
+
+        /* Scroll reveal (up & down) */
+        .inv-hero,
+        .inv-section {
+            opacity: 0;
+            transform: translateY(28px);
+            transition-property: opacity, transform;
+            transition-duration: 400ms, 440ms;
+            transition-delay: 0ms, 0ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 1, 1), cubic-bezier(0.4, 0, 0.72, 1);
+            will-change: opacity, transform;
+        }
+        .inv-hero.is-visible,
+        .inv-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1), cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @@media (prefers-reduced-motion: reduce) {
+            .inv-hero,
+            .inv-section,
+            .octagon-item {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+
+        /* Footer octagon gallery */
+        .inv-footer-gallery {
+            margin-top: 2.25rem;
+            padding: 1.75rem 1rem 2rem;
+            border-radius: 18px;
+            background: color-mix(in srgb, var(--inv-accent) 10%, var(--inv-bg));
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 12%, transparent);
+            text-align: center;
+        }
+        .inv-footer-gallery h2 {
+            font-family: "Cormorant Garamond", serif;
+            color: var(--inv-primary);
+            font-size: 1.55rem;
+            margin: 0 0 1.15rem;
+        }
+        .octagon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem 1.1rem;
+            justify-items: center;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .octagon-item {
+            width: 100%;
+            max-width: 110px;
+            aspect-ratio: 1;
+            opacity: 0;
+            transform: translateY(20px) scale(.94);
+            transition-property: opacity, transform;
+            transition-duration: 400ms, 440ms;
+            transition-delay: 0ms, 0ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 1, 1), cubic-bezier(0.4, 0, 0.72, 1);
+            will-change: opacity, transform;
+        }
+        .octagon-item.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1), cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .octagon-item:nth-child(1) { transition-delay: 0ms, 0ms; }
+        .octagon-item:nth-child(2) { transition-delay: 40ms, 40ms; }
+        .octagon-item:nth-child(3) { transition-delay: 80ms, 80ms; }
+        .octagon-item:nth-child(4) { transition-delay: 120ms, 120ms; }
+        .octagon-item:nth-child(5) { transition-delay: 60ms, 60ms; }
+        .octagon-item:nth-child(6) { transition-delay: 100ms, 100ms; }
+        .octagon-item:nth-child(7) { transition-delay: 140ms, 140ms; }
+        .octagon-item:nth-child(8) { transition-delay: 180ms, 180ms; }
+        .octagon-frame {
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+            overflow: hidden;
+            background: var(--inv-card);
+            filter: drop-shadow(0 8px 16px rgba(44, 36, 28, .16));
+        }
+        .octagon-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .octagon-item:hover .octagon-frame img {
+            transform: scale(1.06);
+        }
+        @@media (max-width: 560px) {
+            .octagon-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: .85rem;
+            }
+            .octagon-item { max-width: 140px; }
+        }
+
         .gallery-carousel {
             background: var(--inv-card);
             border-radius: 16px;
@@ -281,11 +383,91 @@
             font-weight: 600;
         }
         .rsvp-banner.error { background: #fde8e8; color: #8a1f1f; }
+
+        /* Fixed quick-nav dock */
+        html { scroll-behavior: smooth; }
+        body { padding-bottom: 5.5rem; }
+        .inv-dock {
+            position: fixed;
+            left: 50%;
+            bottom: 1.1rem;
+            transform: translateX(-50%);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .4rem .5rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .94);
+            border: 1px solid rgba(255, 255, 255, .8);
+            box-shadow:
+                0 0 0 1px rgba(80, 60, 90, .06),
+                0 10px 28px rgba(60, 40, 70, .16),
+                0 0 24px rgba(180, 160, 210, .35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            max-width: calc(100vw - 1.25rem);
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .inv-dock::-webkit-scrollbar { display: none; }
+        .inv-dock a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 2.35rem;
+            padding: .45rem 1.05rem;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-decoration: none;
+            text-transform: uppercase;
+            white-space: nowrap;
+            transition: transform 180ms ease, filter 180ms ease;
+        }
+        .inv-dock a:hover { transform: translateY(-1px); filter: brightness(.97); }
+        .inv-dock a:active { transform: translateY(0); }
+        .inv-dock a.is-active { box-shadow: inset 0 0 0 1.5px currentColor; }
+        .inv-dock-gallery {
+            background: #d9d6ef;
+            color: #3b2f5c;
+        }
+        .inv-dock-rsvp {
+            background: #f3c9c5;
+            color: #6b2c2c;
+        }
+        .inv-dock-bank {
+            background: #f3e2b0;
+            color: #5c4520;
+        }
+        .inv-dock-home {
+            background: #d8ebe3;
+            color: #1f4d3d;
+        }
+        .inv-dock-map {
+            background: #d4e4f5;
+            color: #1e3f66;
+        }
+        .inv-dock-music {
+            background: #ecd9f2;
+            color: #5a2d6b;
+        }
+        .inv-dock-moments {
+            background: #f5ddd0;
+            color: #6b3a28;
+        }
+        @@media (max-width: 420px) {
+            .inv-dock { gap: .3rem; padding: .35rem .4rem; }
+            .inv-dock a { padding: .42rem .72rem; font-size: .68rem; letter-spacing: .04em; }
+        }
     </style>
 </head>
 <body>
     <div class="inv-wrap">
-        <article class="inv-hero">
+        <article class="inv-hero" id="home">
             @if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl ?? image))
             {
                 <img class="inv-cover" src="@(Model.CoverImageUrl ?? image)" alt="@title" />
@@ -372,7 +554,7 @@
 
         @if (Model.ShowMap && !string.IsNullOrWhiteSpace(mapQuery))
         {
-            <section class="inv-section">
+            <section class="inv-section" id="map">
                 <h2>Venue map</h2>
                 <iframe class="map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                         src="https://maps.google.com/maps?q=@mapQuery&z=15&output=embed"
@@ -384,7 +566,7 @@
         }
         else if (!Model.ShowMap && wedding is not null && !string.IsNullOrWhiteSpace(wedding.VenueName))
         {
-            <section class="inv-section">
+            <section class="inv-section" id="map">
                 <h2>Venue</h2>
                 <p class="inv-meta">@wedding.VenueName@(string.IsNullOrWhiteSpace(wedding.VenueLocation) ? "" : $", {wedding.VenueLocation}")</p>
             </section>
@@ -392,7 +574,7 @@
 
         @if (!string.IsNullOrWhiteSpace(Model.MusicUrl))
         {
-            <section class="inv-section">
+            <section class="inv-section" id="music">
                 <h2>Music</h2>
                 <div class="music-box">
                     @if (spotifyEmbed is not null)
@@ -457,7 +639,48 @@
                 <button class="inv-btn rsvp-submit" type="submit">Send RSVP</button>
             </form>
         </section>
+
+        @if (Model.GalleryPhotos.Any())
+        {
+            var footerPhotos = Model.GalleryPhotos.OrderBy(p => p.SortOrder).Take(8).ToList();
+            <footer class="inv-section inv-footer-gallery" id="moments">
+                <h2>Our moments</h2>
+                <div class="octagon-grid">
+                    @foreach (var p in footerPhotos)
+                    {
+                        <div class="octagon-item">
+                            <div class="octagon-frame">
+                                <img src="@p.FilePath" alt="@p.Label" loading="lazy" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </footer>
+        }
     </div>
+
+    <nav class="inv-dock" aria-label="Quick links">
+        <a class="inv-dock-home" href="#home">Home</a>
+        @if (Model.GalleryPhotos.Any())
+        {
+            <a class="inv-dock-gallery" href="#gallery">Gallery</a>
+        }
+        @if (Model.BankQrs.Any())
+        {
+            <a class="inv-dock-bank" href="#bank-qr">Bank QR</a>
+        }
+        @if ((Model.ShowMap && !string.IsNullOrWhiteSpace(mapQuery)) ||
+             (!Model.ShowMap && wedding is not null && !string.IsNullOrWhiteSpace(wedding.VenueName)))
+        {
+            <a class="inv-dock-map" href="#map">Map</a>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.MusicUrl))
+        {
+            <a class="inv-dock-music" href="#music">Music</a>
+        }
+        <a class="inv-dock-rsvp" href="#rsvp">RSVP</a>
+    </nav>
+
     <script>
         (function () {
             function initCarousel(root) {
@@ -515,6 +738,46 @@
             }
 
             document.querySelectorAll('[data-carousel]').forEach(initCarousel);
+
+            // Scroll reveal — animate in when entering viewport, out when leaving
+            var revealEls = document.querySelectorAll('.inv-hero, .inv-section, .octagon-item');
+            if (revealEls.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                var io = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                        } else {
+                            entry.target.classList.remove('is-visible');
+                        }
+                    });
+                }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+                revealEls.forEach(function (el) { io.observe(el); });
+            } else {
+                revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+            }
+
+            // Highlight dock link for the section in view
+            var dock = document.querySelector('.inv-dock');
+            if (dock) {
+                var links = Array.prototype.slice.call(dock.querySelectorAll('a[href^="#"]'));
+                var targets = links.map(function (a) {
+                    return document.getElementById(a.getAttribute('href').slice(1));
+                }).filter(Boolean);
+
+                if (targets.length) {
+                    var dockIo = new IntersectionObserver(function (entries) {
+                        entries.forEach(function (entry) {
+                            if (!entry.isIntersecting) return;
+                            var id = entry.target.id;
+                            links.forEach(function (a) {
+                                a.classList.toggle('is-active', a.getAttribute('href') === '#' + id);
+                            });
+                        });
+                    }, { threshold: 0.35, rootMargin: '-20% 0px -45% 0px' });
+                    targets.forEach(function (t) { dockIo.observe(t); });
+                }
+            }
         })();
     </script>
     <input type="hidden" data-web="@(wedding?.WebId ?? 0)" data-partner="@(Model.Slug ?? "")" />
