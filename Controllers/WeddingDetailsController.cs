@@ -12,8 +12,17 @@ public class WeddingDetailsController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var wedding = await _db.Weddings.Include(w => w.StyleDecisions).FirstOrDefaultAsync();
-        return wedding is null ? RedirectToAction("Index", "Home") : View(wedding);
+        var weddings = await _db.Weddings
+            .Include(w => w.WebsiteSettings)
+            .OrderBy(w => w.WebId)
+            .ToListAsync();
+        return View(weddings);
+    }
+
+    public async Task<IActionResult> Edit(int id)
+    {
+        var wedding = await _db.Weddings.FindAsync(id);
+        return wedding is null ? NotFound() : View(wedding);
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -22,32 +31,23 @@ public class WeddingDetailsController : Controller
         var wedding = await _db.Weddings.FindAsync(model.Id);
         if (wedding is null) return NotFound();
 
-        wedding.Partner1Name = model.Partner1Name;
-        wedding.Partner2Name = model.Partner2Name;
+        wedding.Partner1Name = model.Partner1Name?.Trim() ?? wedding.Partner1Name;
+        wedding.Partner2Name = model.Partner2Name?.Trim() ?? wedding.Partner2Name;
         wedding.WeddingDate = model.WeddingDate;
-        wedding.VenueName = model.VenueName;
-        wedding.VenueLocation = model.VenueLocation;
-        wedding.TotalBudget = model.TotalBudget;
-        wedding.CeremonyNotes = model.CeremonyNotes;
+        wedding.VenueName = string.IsNullOrWhiteSpace(model.VenueName) ? null : model.VenueName.Trim();
+        wedding.VenueLocation = string.IsNullOrWhiteSpace(model.VenueLocation) ? null : model.VenueLocation.Trim();
+        wedding.CeremonyNotes = string.IsNullOrWhiteSpace(model.CeremonyNotes) ? null : model.CeremonyNotes.Trim();
         await _db.SaveChangesAsync();
-        TempData["Ok"] = "Wedding details saved.";
-        return RedirectToAction(nameof(Index));
-    }
 
-    [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddStyle(string category, string decision)
-    {
-        var weddingId = await _db.GetCurrentWeddingIdAsync();
-        if (weddingId is null || string.IsNullOrWhiteSpace(category)) return RedirectToAction(nameof(Index));
-
-        _db.StyleDecisions.Add(new StyleDecision
+        if (wedding.WebsiteSettings is null)
+            await _db.Entry(wedding).Reference(w => w.WebsiteSettings).LoadAsync();
+        if (wedding.WebsiteSettings is not null)
         {
-            WeddingId = weddingId.Value,
-            Category = category.Trim(),
-            Decision = decision?.Trim(),
-            IsApproved = true
-        });
-        await _db.SaveChangesAsync();
+            wedding.WebsiteSettings.SiteTitle = wedding.CoupleDisplayName;
+            await _db.SaveChangesAsync();
+        }
+
+        TempData["Ok"] = "Couple details saved.";
         return RedirectToAction(nameof(Index));
     }
 }

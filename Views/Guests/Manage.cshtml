@@ -1,0 +1,57 @@
+@using WeddingManagementSystem.Models
+@model List<Guest>
+@{
+    ViewData["Title"] = "Guest list";
+    var weddingId = (int)ViewBag.WeddingId;
+    var coupleName = (string)ViewBag.CoupleName;
+    var webId = (int)ViewBag.WebId;
+}
+
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Guest list</h1>
+        <p class="page-lead">@coupleName · Web ID @webId</p>
+    </div>
+    <div class="page-head-actions">
+        <a class="btn-outline" asp-action="Index">Back</a>
+        <a class="btn-gold" asp-action="Create" asp-route-weddingId="@weddingId">Add guest</a>
+    </div>
+</div>
+
+@if (TempData["Ok"] is string ok)
+{
+    <div class="info-banner">@ok</div>
+}
+
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Side</th>
+                <th>RSVP</th>
+                <th>Party</th>
+                <th>Invite</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="5" class="muted">No guests yet for this couple.</td></tr>
+        }
+        @foreach (var g in Model)
+        {
+            <tr>
+                <td>
+                    <strong>@g.FullName</strong>
+                    <div class="muted sm-text">@(g.Email ?? "—")</div>
+                </td>
+                <td>@(g.Side ?? "—")</td>
+                <td><span class="pill">@g.RsvpStatus</span></td>
+                <td>@g.PartySize</td>
+                <td>@(g.InvitationSent ? "Sent" : "Not sent")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

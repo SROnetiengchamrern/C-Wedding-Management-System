@@ -1,12 +1,21 @@
 @model WeddingManagementSystem.Models.Guest
 @{
     ViewData["Title"] = "Add guest";
+    var coupleName = (string)(ViewBag.CoupleName ?? "");
 }
 
-<h1 class="page-title">Add guest</h1>
-<div class="form-card">
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Add guest</h1>
+        <p class="page-lead">@coupleName</p>
+    </div>
+    <a class="btn-outline" asp-action="Manage" asp-route-weddingId="@Model.WeddingId">Back</a>
+</div>
+
+<div class="form-card" style="max-width:32rem;">
     <form asp-action="Create" method="post">
         @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="WeddingId" />
         <div class="form-group">
             <label asp-for="FullName">Full name</label>
             <input asp-for="FullName" required />
@@ -31,9 +40,13 @@
             <label asp-for="PartySize">Party size</label>
             <input asp-for="PartySize" type="number" min="1" />
         </div>
+        <div class="form-group">
+            <label asp-for="RsvpStatus">RSVP</label>
+            <select asp-for="RsvpStatus" asp-items="Html.GetEnumSelectList<WeddingManagementSystem.Models.RsvpStatus>()"></select>
+        </div>
         <div class="form-actions">
             <button type="submit" class="btn-gold">Save</button>
-            <a class="btn-outline" asp-action="Index">Cancel</a>
+            <a class="btn-outline" asp-action="Manage" asp-route-weddingId="@Model.WeddingId">Cancel</a>
         </div>
     </form>
 </div>

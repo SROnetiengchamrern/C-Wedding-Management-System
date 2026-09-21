@@ -39,38 +39,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/CHAMRERN/WeddingManagementSystem/Views/Agreements/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdyZWVtZW50c1xDcmVhdGUuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Agreements/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWdyZWVtZW50c1xJbmRleC5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Budget/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVkZ2V0XENyZWF0ZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Budget/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVkZ2V0XEluZGV4LmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Delivery/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVsaXZlcnlcQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Delivery/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVsaXZlcnlcSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Documents/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXENyZWF0ZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Documents/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdW1lbnRzXEluZGV4LmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/CHAMRERN/WeddingManagementSystem/Views/Gifts/ExportPdf.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR2lmdHNcRXhwb3J0UGRmLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -91,6 +59,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3Vlc3RzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/CHAMRERN/WeddingManagementSystem/Views/Guests/Manage.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3Vlc3RzXE1hbmFnZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/CHAMRERN/WeddingManagementSystem/Views/Home/Empty.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxFbXB0eS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -103,72 +75,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/CHAMRERN/WeddingManagementSystem/Views/Imported/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW1wb3J0ZWRcQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Imported/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW1wb3J0ZWRcSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Inbox/Compose.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW5ib3hcQ29tcG9zZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Inbox/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW5ib3hcRGV0YWlscy5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Inbox/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW5ib3hcSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Menu/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudVxDcmVhdGUuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Menu/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudVxJbmRleC5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Schedule/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2NoZWR1bGVcQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Schedule/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2NoZWR1bGVcSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Settings/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2V0dGluZ3NcSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/CHAMRERN/WeddingManagementSystem/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/CHAMRERN/WeddingManagementSystem/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Tasks/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGFza3NcQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Tasks/Edit.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGFza3NcRWRpdC5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Tasks/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGFza3NcSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Timeline/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGltZWxpbmVcQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/CHAMRERN/WeddingManagementSystem/Views/Timeline/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGltZWxpbmVcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/CHAMRERN/WeddingManagementSystem/Views/Website/Edit.cshtml]
@@ -185,6 +97,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/CHAMRERN/WeddingManagementSystem/Views/Website/Public.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2Vic2l0ZVxQdWJsaWMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/CHAMRERN/WeddingManagementSystem/Views/WeddingDetails/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ0RldGFpbHNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/CHAMRERN/WeddingManagementSystem/Views/WeddingDetails/Index.cshtml]

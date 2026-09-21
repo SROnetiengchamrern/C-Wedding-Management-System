@@ -1,230 +1,121 @@
-﻿@using WeddingManagementSystem.Models
-@model WeddingManagementSystem.ViewModels.DashboardViewModel
+﻿@model WeddingManagementSystem.ViewModels.DashboardViewModel
 @{
     ViewData["Title"] = "Overview";
-    var w = Model.Wedding;
-    var paidPct = Model.TotalBudget > 0 ? (int)Math.Round(Model.AmountPaid / Model.TotalBudget * 100) : 0;
-    var guestPct = Model.GuestEssentialsTotal > 0
-        ? (int)Math.Round((double)Model.GuestEssentialsDone / Model.GuestEssentialsTotal * 100)
-        : 0;
 }
 
 <div class="dash-header">
     <div>
-        <p class="eyebrow">Your wedding</p>
-        <h1 class="couple-name">@w.CoupleDisplayName</h1>
-        <p class="wedding-meta">
-            <span>@w.WeddingDate.ToString("MMM d, yyyy")</span>
-            @if (!string.IsNullOrWhiteSpace(w.VenueName))
-            {
-                <span class="dot">·</span>
-                <span>@w.VenueName@(string.IsNullOrWhiteSpace(w.VenueLocation) ? "" : $", {w.VenueLocation}")</span>
-            }
-        </p>
+        <p class="eyebrow">Wedding Admin</p>
+        <h1 class="couple-name">Overview</h1>
+        <p class="wedding-meta">Couples, invite sites, gift money, and RSVP at a glance.</p>
     </div>
-    <a class="btn-gold" asp-controller="Tasks" asp-action="Create">Get Started</a>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <a class="btn-outline" asp-controller="Website" asp-action="Index">Wedding Website</a>
+        <a class="btn-gold" asp-controller="Gifts" asp-action="Index">Gift Money</a>
+    </div>
 </div>
 
 <div class="info-banner">
     <span class="info-icon">i</span>
-    Manage shared access and notifications in Settings when you’re ready to invite your partner or planner.
+    Choose a couple below to edit their invite site or gift list. Public guests use each couple’s published link.
 </div>
 
 <div class="stat-row">
     <div class="stat-card">
-        <div class="stat-label">Days Left</div>
-        <div class="stat-value">@Model.DaysLeft</div>
-        <div class="stat-sub">Agreements</div>
+        <div class="stat-label">Couples</div>
+        <div class="stat-value">@Model.CouplesCount</div>
+        <div class="stat-sub">web_id partners</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label">Tasks Completed</div>
-        <div class="stat-value">@Model.TasksCompleted<span class="stat-of">/@Model.TasksTotal</span></div>
-        <div class="stat-sub">Across all checklists</div>
+        <div class="stat-label">Invite sites</div>
+        <div class="stat-value">@Model.PublishedSites<span class="stat-of">/@Model.CouplesCount</span></div>
+        <div class="stat-sub">@Model.DraftSites draft · @Model.PublishedSites published</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label">Paid</div>
-        <div class="stat-value">@Model.AmountPaid.ToString("C0")</div>
-        <div class="stat-sub">of @Model.TotalBudget.ToString("C0") · @paidPct%</div>
+        <div class="stat-label">Gift money</div>
+        <div class="stat-value">@Model.GiftGuests</div>
+        <div class="stat-sub">KHR @Model.GiftKhr.ToString("N0") ៛ · USD @Model.GiftUsd.ToString("N0") $</div>
     </div>
 </div>
 
 <div class="status-row">
-    <div class="status-chip @(Model.OverdueTasks > 0 ? "warn" : "")">
-        <span class="chip-icon">!</span>
-        <div>
-            <strong>@Model.OverdueTasks Overdue</strong>
-            <span>tasks need attention</span>
-        </div>
-    </div>
     <div class="status-chip ok">
         <span class="chip-icon">✓</span>
         <div>
-            <strong>@Model.PaymentsOnTrack Payments</strong>
-            <span>on track</span>
+            <strong>@Model.RsvpAccepted Accepted</strong>
+            <span>RSVP joyfully accepts</span>
+        </div>
+    </div>
+    <div class="status-chip warn">
+        <span class="chip-icon">×</span>
+        <div>
+            <strong>@Model.RsvpDeclined Declined</strong>
+            <span>RSVP declines</span>
         </div>
     </div>
     <div class="status-chip">
-        <span class="chip-icon">◷</span>
+        <span class="chip-icon">?</span>
         <div>
-            <strong>@Model.TasksThisWeek Tasks</strong>
-            <span>this week</span>
+            <strong>@Model.RsvpMaybe Maybe</strong>
+            <span>not sure yet</span>
         </div>
     </div>
     <div class="status-chip">
-        <span class="chip-icon">$</span>
+        <span class="chip-icon">✉</span>
         <div>
-            <strong>@Model.PaymentsThisWeek Payment</strong>
-            <span>this week</span>
+            <strong>@Model.RsvpTotal Total</strong>
+            <span>website RSVP replies</span>
         </div>
     </div>
 </div>
 
-<div class="panel next-step">
+<section class="panel" style="margin-top:1rem;">
     <div class="panel-head">
-        <h2>Next step</h2>
-        @if (Model.NextStepTask?.IsOverdue == true)
-        {
-            <span class="badge-overdue">Overdue</span>
-        }
+        <h2>All couples</h2>
+        <a class="link-gold" asp-controller="Website" asp-action="Index">Manage websites →</a>
     </div>
-    @if (Model.NextStepTask is not null)
+
+    <div class="wedding-site-list" style="max-width:none;">
+    @foreach (var c in Model.Couples)
     {
-        <h3>@Model.NextStepTask.Title</h3>
-        <p class="muted">
-            @(Model.NextStepTask.DueDate?.ToString("MMM d, yyyy") ?? "No due date")
-            @if (!string.IsNullOrWhiteSpace(Model.NextStepTask.Description))
-            {
-                <span>— @Model.NextStepTask.Description</span>
-            }
-        </p>
-        <div class="action-row">
-            <a class="btn-outline" asp-controller="Tasks" asp-action="Edit" asp-route-id="@Model.NextStepTask.Id">Go to task</a>
-            <form asp-action="MarkTaskDone" method="post" class="inline-form">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.NextStepTask.Id" />
-                <button type="submit" class="btn-ghost">Already done</button>
-            </form>
-        </div>
-    }
-    else
-    {
-        <p class="muted">You’re all caught up — nice work.</p>
-    }
-</div>
-
-<div class="grid-2">
-    <div class="mini-panel">
-        <h3>Upload venue contract</h3>
-        <p class="muted">Keep signed agreements in Documents for easy access.</p>
-        <a class="link-gold" asp-controller="Documents" asp-action="Index">Open documents →</a>
-    </div>
-    <div class="mini-panel">
-        <h3>Payment due</h3>
-        @if (Model.NextPayment is not null)
-        {
-            <p class="muted">@Model.NextPayment.Description (@Model.NextPayment.Amount.ToString("C0")@(Model.NextPayment.Vendor is null ? "" : $" to {Model.NextPayment.Vendor.Name}"))</p>
-            <a class="link-gold" asp-controller="Budget" asp-action="Index">View budget →</a>
-        }
-        else
-        {
-            <p class="muted">No upcoming payments.</p>
-        }
-    </div>
-</div>
-
-<div class="ai-bar">
-    <div>
-        <strong>Personal AI advisor</strong>
-        <span class="muted">Get a suggested next step based on your plan.</span>
-    </div>
-    <button type="button" class="btn-outline" disabled title="Coming soon">Suggest next step (AI)</button>
-</div>
-
-<div class="grid-2">
-    <div class="panel">
-        <div class="panel-head">
-            <h2>Upcoming deadlines</h2>
-            <a asp-controller="Tasks" asp-action="Index" class="link-gold">View all</a>
-        </div>
-        <ul class="list-rows">
-            @foreach (var t in Model.UpcomingDeadlines)
-            {
-                <li>
-                    <div>
-                        <strong>@t.Title</strong>
-                        @if (t.IsOverdue)
+        <div class="wedding-site-row">
+            <a class="wedding-site-link" asp-controller="Website" asp-action="Edit" asp-route-weddingId="@c.WeddingId">
+                <span class="wedding-site-num">@c.WebId</span>
+                <span class="wedding-site-main">
+                    <strong>@c.CoupleName</strong>
+                    <span class="muted sm-text">
+                        @c.WeddingDate.ToString("MMM d, yyyy")
+                        @if (!string.IsNullOrWhiteSpace(c.VenueName))
                         {
-                            <span class="badge-overdue sm">Overdue</span>
+                            <text> · @c.VenueName</text>
                         }
-                    </div>
-                    <span class="muted">@(t.DueDate?.ToString("MMM d, yyyy") ?? "—")</span>
-                </li>
-            }
-        </ul>
-    </div>
-    <div class="panel">
-        <div class="panel-head">
-            <h2>Upcoming payments</h2>
-            <a asp-controller="Budget" asp-action="Index" class="link-gold">View all</a>
+                        · @c.DaysLeft days left
+                    </span>
+                    <span class="muted sm-text">
+                        @if (!string.IsNullOrWhiteSpace(c.Slug))
+                        {
+                            <text>/w/@c.Slug · </text>
+                        }
+                        Gifts @c.GiftCount · KHR @c.GiftKhr.ToString("N0") · USD @c.GiftUsd.ToString("N0") · RSVP @c.RsvpCount
+                    </span>
+                </span>
+            </a>
+            <span class="wedding-site-badge @(c.IsPublished ? "live" : "draft")">@(c.IsPublished ? "Published" : "Draft")</span>
+            <a class="wedding-site-arrow" asp-controller="Gifts" asp-action="Manage" asp-route-weddingId="@c.WeddingId">Gifts →</a>
         </div>
-        <ul class="list-rows">
-            @foreach (var p in Model.UpcomingPayments)
-            {
-                <li>
-                    <div>
-                        <strong>@(p.Vendor?.Name ?? p.Description)</strong>
-                        <div class="muted sm-text">@p.Description</div>
-                    </div>
-                    <div class="text-end">
-                        <strong>@p.Amount.ToString("C0")</strong>
-                        <div class="muted sm-text">@(p.DueDate?.ToString("MMM d") ?? "—")</div>
-                    </div>
-                </li>
-            }
-        </ul>
+    }
     </div>
-</div>
+</section>
 
-<div class="panel">
-    <div class="panel-head">
-        <h2>Wedding readiness</h2>
+<section class="grid-2" style="margin-top:1rem;">
+    <div class="mini-panel">
+        <h3>Wedding Website</h3>
+        <p class="muted">Themes, gallery, bank QR, map, music, and public invite links.</p>
+        <a class="btn-outline" asp-controller="Website" asp-action="Index">Open websites</a>
     </div>
-    <div class="readiness">
-        <div class="readiness-label">
-            <span>Guest Essentials</span>
-            <span>@Model.GuestEssentialsDone/@Model.GuestEssentialsTotal</span>
-        </div>
-        <div class="progress-track">
-            <div class="progress-fill" style="width:@guestPct%"></div>
-        </div>
+    <div class="mini-panel">
+        <h3>Gift Money</h3>
+        <p class="muted">Enter guest gifts in English or Khmer. Export PDF / XLSX per couple.</p>
+        <a class="btn-outline" asp-controller="Gifts" asp-action="Index">Open gift money</a>
     </div>
-    <h3 class="subhead">Approved style decisions</h3>
-    <div class="style-tags">
-        @foreach (var s in Model.ApprovedStyles)
-        {
-            <div class="style-tag">
-                <strong>@s.Category</strong>
-                <span>@s.Decision</span>
-            </div>
-        }
-    </div>
-</div>
-
-<div class="panel">
-    <div class="panel-head">
-        <h2>Recent documents</h2>
-        <a asp-controller="Documents" asp-action="Index" class="link-gold">View all</a>
-    </div>
-    <ul class="doc-list">
-        @foreach (var d in Model.RecentDocuments)
-        {
-            <li>
-                <span class="doc-icon">PDF</span>
-                <div>
-                    <strong>@d.FileName</strong>
-                    <div class="muted sm-text">@d.UploadedAt.ToLocalTime().ToString("MMM d, yyyy") · @(d.Category ?? "File")</div>
-                </div>
-            </li>
-        }
-    </ul>
-</div>
+</section>

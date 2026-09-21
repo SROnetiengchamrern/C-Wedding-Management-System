@@ -1,37 +1,43 @@
-@using WeddingManagementSystem.Models
-@model List<Guest>
+@model IEnumerable<WeddingManagementSystem.Controllers.GuestPartnerListItem>
 @{
-    ViewData["Title"] = "Guest Management";
+    ViewData["Title"] = "Guests / RSVP";
 }
 
-<div class="toolbar">
-    <h1 class="page-title">Guest Management</h1>
-    <a class="btn-gold" asp-action="Create">Add guest</a>
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Guests / RSVP</h1>
+        <p class="page-lead">Pick a couple to manage their guest list.</p>
+    </div>
 </div>
 
 <div class="table-wrap">
-    <table class="data">
+    <table class="data-table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Side</th>
-                <th>RSVP</th>
-                <th>Party</th>
-                <th>Invite</th>
+                <th>Web ID</th>
+                <th>Couple</th>
+                <th>Date</th>
+                <th>Guests</th>
+                <th>Accepted</th>
+                <th>Pending</th>
+                <th>Declined</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-        @foreach (var g in Model)
+        @foreach (var row in Model)
         {
             <tr>
-                <td>
-                    <strong>@g.FullName</strong>
-                    <div class="muted sm-text">@g.Email</div>
+                <td>@row.WebId</td>
+                <td><strong>@row.CoupleName</strong></td>
+                <td>@row.WeddingDate.ToString("MMM d, yyyy")</td>
+                <td>@row.GuestCount</td>
+                <td>@row.Accepted</td>
+                <td>@row.Pending</td>
+                <td>@row.Declined</td>
+                <td class="actions">
+                    <a class="btn-outline btn-sm" asp-action="Manage" asp-route-weddingId="@row.WeddingId">Manage</a>
                 </td>
-                <td>@(g.Side ?? "—")</td>
-                <td><span class="pill pill-pending">@g.RsvpStatus</span></td>
-                <td>@g.PartySize</td>
-                <td>@(g.InvitationSent ? "Sent" : "Not sent")</td>
             </tr>
         }
         </tbody>

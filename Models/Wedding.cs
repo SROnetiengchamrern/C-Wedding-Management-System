@@ -34,19 +34,7 @@ public class Wedding
     [Column(TypeName = "decimal(18,2)")]
     public decimal TotalBudget { get; set; }
 
-    public ICollection<WeddingTask> Tasks { get; set; } = new List<WeddingTask>();
-    public ICollection<Payment> Payments { get; set; } = new List<Payment>();
-    public ICollection<Document> Documents { get; set; } = new List<Document>();
     public ICollection<Guest> Guests { get; set; } = new List<Guest>();
-    public ICollection<Vendor> Vendors { get; set; } = new List<Vendor>();
-    public ICollection<StyleDecision> StyleDecisions { get; set; } = new List<StyleDecision>();
-    public ICollection<Agreement> Agreements { get; set; } = new List<Agreement>();
-    public ICollection<TimelineEvent> TimelineEvents { get; set; } = new List<TimelineEvent>();
-    public ICollection<InboxMessage> InboxMessages { get; set; } = new List<InboxMessage>();
-    public ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
-    public ICollection<DeliveryItem> DeliveryItems { get; set; } = new List<DeliveryItem>();
-    public ICollection<ScheduleItem> ScheduleItems { get; set; } = new List<ScheduleItem>();
-    public ICollection<ImportedRecord> ImportedRecords { get; set; } = new List<ImportedRecord>();
     public ICollection<WeddingGift> WeddingGifts { get; set; } = new List<WeddingGift>();
     public WebsiteSettings? WebsiteSettings { get; set; }
 

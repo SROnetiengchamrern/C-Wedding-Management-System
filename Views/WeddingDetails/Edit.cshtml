@@ -1,0 +1,44 @@
+@model WeddingManagementSystem.Models.Wedding
+@{
+    ViewData["Title"] = "Edit couple";
+}
+
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Edit couple</h1>
+        <p class="page-lead">@Model.CoupleDisplayName · Web ID @Model.WebId</p>
+    </div>
+    <a class="btn-outline" asp-action="Index">Back to list</a>
+</div>
+
+<div class="form-card" style="max-width:32rem;">
+    <form asp-action="Save" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group">
+            <label asp-for="Partner1Name">Partner 1</label>
+            <input asp-for="Partner1Name" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Partner2Name">Partner 2</label>
+            <input asp-for="Partner2Name" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="WeddingDate">Wedding date</label>
+            <input asp-for="WeddingDate" type="date" />
+        </div>
+        <div class="form-group">
+            <label asp-for="VenueName">Venue</label>
+            <input asp-for="VenueName" />
+        </div>
+        <div class="form-group">
+            <label asp-for="VenueLocation">Location</label>
+            <input asp-for="VenueLocation" />
+        </div>
+        <div class="form-group">
+            <label asp-for="CeremonyNotes">Ceremony notes</label>
+            <textarea asp-for="CeremonyNotes" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn-gold">Save details</button>
+    </form>
+</div>
