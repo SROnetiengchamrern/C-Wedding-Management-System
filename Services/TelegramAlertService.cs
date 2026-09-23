@@ -47,13 +47,14 @@ public class TelegramAlertService : ITelegramAlertService
         int partySize = 1,
         CancellationToken ct = default)
     {
-        if (!_options.Enabled ||
-            string.IsNullOrWhiteSpace(_options.BotToken) ||
-            string.IsNullOrWhiteSpace(_options.ChatId))
+        var route = _options.ResolveForWebId(webId);
+        if (!_options.Enabled || route is null)
         {
-            _logger.LogDebug("Telegram RSVP alert skipped (disabled or missing config).");
+            _logger.LogDebug("Telegram RSVP alert skipped (disabled or missing config for web_id {WebId}).", webId);
             return;
         }
+
+        var (botToken, chatId) = route.Value;
 
         var replyLabel = reply switch
         {
@@ -79,10 +80,10 @@ public class TelegramAlertService : ITelegramAlertService
         sb.AppendLine();
         sb.AppendLine($"<i>{DateTime.Now:yyyy-MM-dd HH:mm}</i>");
 
-        var url = $"https://api.telegram.org/bot{_options.BotToken.Trim()}/sendMessage";
+        var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
         var payload = new
         {
-            chat_id = _options.ChatId.Trim(),
+            chat_id = chatId,
             text = sb.ToString(),
             parse_mode = "HTML",
             disable_web_page_preview = true

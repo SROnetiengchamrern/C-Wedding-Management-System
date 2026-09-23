@@ -13,3 +13,6 @@ dotnet restore
 dotnet tool install --global dotnet-ef
 dotnet ef database update
 dotnet run
+
+
+https://api.telegram.org/bot8869198266:AAEbYUK7RuNBv-fNwuDozVoOFcKjD3p8eFU/getUpdates
