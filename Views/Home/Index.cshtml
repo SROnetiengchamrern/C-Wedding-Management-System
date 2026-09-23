@@ -84,7 +84,7 @@
                 <span class="wedding-site-main">
                     <strong>@c.CoupleName</strong>
                     <span class="muted sm-text">
-                        @c.WeddingDate.ToString("MMM d, yyyy")
+                        @c.DateDisplayShort
                         @if (!string.IsNullOrWhiteSpace(c.VenueName))
                         {
                             <text> · @c.VenueName</text>

@@ -33,7 +33,12 @@ public class WeddingDetailsController : Controller
 
         wedding.Partner1Name = model.Partner1Name?.Trim() ?? wedding.Partner1Name;
         wedding.Partner2Name = model.Partner2Name?.Trim() ?? wedding.Partner2Name;
-        wedding.WeddingDate = model.WeddingDate;
+        wedding.WeddingDate = model.WeddingDate.Date;
+        wedding.WeddingDateEnd = model.WeddingDateEnd?.Date;
+        if (wedding.WeddingDateEnd is DateTime end && end < wedding.WeddingDate)
+            wedding.WeddingDateEnd = wedding.WeddingDate;
+        if (wedding.WeddingDateEnd == wedding.WeddingDate)
+            wedding.WeddingDateEnd = null;
         wedding.VenueName = string.IsNullOrWhiteSpace(model.VenueName) ? null : model.VenueName.Trim();
         wedding.VenueLocation = string.IsNullOrWhiteSpace(model.VenueLocation) ? null : model.VenueLocation.Trim();
         wedding.CeremonyNotes = string.IsNullOrWhiteSpace(model.CeremonyNotes) ? null : model.CeremonyNotes.Trim();

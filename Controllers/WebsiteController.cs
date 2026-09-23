@@ -13,6 +13,7 @@ public class WebsiteController : Controller
     private const long MaxImageBytes = 900 * 1024;
     private const int MaxBankQr = 5;
     private const int MaxGallery = 15;
+    private const int MaxCover = 8;
 
     private readonly ApplicationDbContext _db;
     private readonly IWebHostEnvironment _env;
@@ -138,7 +139,6 @@ public class WebsiteController : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Save(
         WebsiteSettings model,
-        IFormFile? coverImageFile,
         IFormFile? shareImageFile,
         IFormFile? partner1PhotoFile,
         IFormFile? partner2PhotoFile)
@@ -172,14 +172,14 @@ public class WebsiteController : Controller
         settings.MusicUrl = model.MusicUrl;
         settings.IsPublished = model.IsPublished;
 
-        settings.CoverImageUrl = await ResolveImageAsync(
-            coverImageFile, model.CoverImageUrl, settings.CoverImageUrl, "cover");
         settings.ShareImageUrl = await ResolveImageAsync(
             shareImageFile, model.ShareImageUrl, settings.ShareImageUrl, "share");
         settings.Partner1PhotoUrl = await ResolveImageAsync(
             partner1PhotoFile, model.Partner1PhotoUrl, settings.Partner1PhotoUrl, "couple");
         settings.Partner2PhotoUrl = await ResolveImageAsync(
             partner2PhotoFile, model.Partner2PhotoUrl, settings.Partner2PhotoUrl, "couple");
+
+        await SyncCoverImageUrlAsync(settings);
 
         if (string.IsNullOrWhiteSpace(settings.ShareImageUrl) && !string.IsNullOrWhiteSpace(settings.CoverImageUrl))
             settings.ShareImageUrl = settings.CoverImageUrl;
@@ -438,16 +438,92 @@ public class WebsiteController : Controller
         return BackToEdit(settings?.WeddingId ?? 0);
     }
 
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadCover(int id, List<IFormFile>? files)
+    {
+        var settings = await _db.WebsiteSettings.Include(s => s.CoverPhotos).FirstOrDefaultAsync(s => s.Id == id);
+        if (settings is null) return NotFound();
+
+        var existing = settings.CoverPhotos.Count;
+        if (files is null || files.Count == 0)
+        {
+            TempData["Error"] = "Choose at least one image.";
+            return BackToEdit(settings.WeddingId);
+        }
+
+        var order = settings.CoverPhotos.Any() ? settings.CoverPhotos.Max(q => q.SortOrder) + 1 : 1;
+        var added = 0;
+        foreach (var file in files)
+        {
+            if (existing + added >= MaxCover) break;
+            var saved = await SaveImageAsync(file, "cover");
+            if (saved is null) continue;
+            settings.CoverPhotos.Add(new WebsiteCoverPhoto
+            {
+                FilePath = saved,
+                Label = $"Cover {existing + added + 1}",
+                SortOrder = order++
+            });
+            added++;
+        }
+
+        await SyncCoverImageUrlAsync(settings);
+        await _db.SaveChangesAsync();
+        TempData["Ok"] = added > 0 ? $"Added {added} cover image(s)." : "No valid images uploaded (PNG/JPEG, max ~900KB).";
+        return BackToEdit(settings.WeddingId);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> MoveCover(int id, string direction)
+    {
+        var item = await _db.WebsiteCoverPhotos.FindAsync(id);
+        if (item is null) return NotFound();
+
+        var settings = await _db.WebsiteSettings.Include(s => s.CoverPhotos).FirstOrDefaultAsync(s => s.Id == item.WebsiteSettingsId);
+        var list = await _db.WebsiteCoverPhotos
+            .Where(x => x.WebsiteSettingsId == item.WebsiteSettingsId)
+            .OrderBy(x => x.SortOrder)
+            .ToListAsync();
+        var idx = list.FindIndex(x => x.Id == id);
+        var target = direction == "up" ? idx - 1 : idx + 1;
+        if (idx >= 0 && target >= 0 && target < list.Count)
+            (list[idx].SortOrder, list[target].SortOrder) = (list[target].SortOrder, list[idx].SortOrder);
+
+        if (settings is not null)
+            await SyncCoverImageUrlAsync(settings);
+        await _db.SaveChangesAsync();
+        return BackToEdit(settings?.WeddingId ?? 0);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveCover(int id)
+    {
+        var item = await _db.WebsiteCoverPhotos.FindAsync(id);
+        if (item is null) return NotFound();
+        var settings = await _db.WebsiteSettings.Include(s => s.CoverPhotos).FirstOrDefaultAsync(s => s.Id == item.WebsiteSettingsId);
+        DeletePhysical(item.FilePath);
+        settings?.CoverPhotos.Remove(item);
+        _db.WebsiteCoverPhotos.Remove(item);
+        if (settings is not null)
+            await SyncCoverImageUrlAsync(settings);
+        await _db.SaveChangesAsync();
+        TempData["Ok"] = "Cover image removed.";
+        return BackToEdit(settings?.WeddingId ?? 0);
+    }
+
     public async Task<IActionResult> Preview(int weddingId)
     {
         var settings = await _db.WebsiteSettings
             .Include(w => w.Wedding)
             .Include(w => w.BankQrs)
             .Include(w => w.GalleryPhotos)
+            .Include(w => w.CoverPhotos)
             .FirstOrDefaultAsync(w => w.WeddingId == weddingId);
         if (settings is null) return NotFound();
         settings.BankQrs = settings.BankQrs.OrderBy(x => x.SortOrder).ToList();
         settings.GalleryPhotos = settings.GalleryPhotos.OrderBy(x => x.SortOrder).ToList();
+        settings.CoverPhotos = settings.CoverPhotos.OrderBy(x => x.SortOrder).ToList();
+        await EnsureLegacyCoverAsync(settings);
         return View("Public", settings);
     }
 
@@ -459,12 +535,15 @@ public class WebsiteController : Controller
             .Include(w => w.Wedding)
             .Include(w => w.BankQrs)
             .Include(w => w.GalleryPhotos)
+            .Include(w => w.CoverPhotos)
             .FirstOrDefaultAsync(w => w.Slug == slug);
 
         if (settings is null || !settings.IsPublished) return NotFound();
 
         settings.BankQrs = settings.BankQrs.OrderBy(x => x.SortOrder).ToList();
         settings.GalleryPhotos = settings.GalleryPhotos.OrderBy(x => x.SortOrder).ToList();
+        settings.CoverPhotos = settings.CoverPhotos.OrderBy(x => x.SortOrder).ToList();
+        await EnsureLegacyCoverAsync(settings);
         return View(settings);
     }
 
@@ -644,8 +723,38 @@ public class WebsiteController : Controller
     {
         await _db.Entry(settings).Collection(s => s.BankQrs).LoadAsync();
         await _db.Entry(settings).Collection(s => s.GalleryPhotos).LoadAsync();
+        await _db.Entry(settings).Collection(s => s.CoverPhotos).LoadAsync();
         settings.BankQrs = settings.BankQrs.OrderBy(x => x.SortOrder).ToList();
         settings.GalleryPhotos = settings.GalleryPhotos.OrderBy(x => x.SortOrder).ToList();
+        settings.CoverPhotos = settings.CoverPhotos.OrderBy(x => x.SortOrder).ToList();
+        await EnsureLegacyCoverAsync(settings);
+    }
+
+    private async Task EnsureLegacyCoverAsync(WebsiteSettings settings)
+    {
+        if (settings.CoverPhotos.Any()) return;
+        if (string.IsNullOrWhiteSpace(settings.CoverImageUrl)) return;
+
+        settings.CoverPhotos.Add(new WebsiteCoverPhoto
+        {
+            WebsiteSettingsId = settings.Id,
+            FilePath = settings.CoverImageUrl,
+            Label = "Cover 1",
+            SortOrder = 1
+        });
+        await _db.SaveChangesAsync();
+        settings.CoverPhotos = settings.CoverPhotos.OrderBy(x => x.SortOrder).ToList();
+    }
+
+    private async Task SyncCoverImageUrlAsync(WebsiteSettings settings)
+    {
+        var first = settings.CoverPhotos
+            .Where(x => _db.Entry(x).State != EntityState.Deleted)
+            .OrderBy(x => x.SortOrder)
+            .Select(x => x.FilePath)
+            .FirstOrDefault();
+        settings.CoverImageUrl = first;
+        await Task.CompletedTask;
     }
 
     private async Task<string?> EnsureUniqueSlugAsync(string? slug, int? excludeId)

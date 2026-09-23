@@ -151,6 +151,50 @@
     }
 </section>
 
+@* —— Cover images —— *@
+<section class="invite-admin-card">
+    <h2>Cover images</h2>
+    <p class="muted">Add one or more covers for the public invite hero. They slide every 2 seconds. Max ~900KB each, up to 8. Reorder with Up/Down.</p>
+    <form asp-action="UploadCover" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div class="form-group">
+            <label>Add images</label>
+            <input type="file" name="files" accept="image/png,image/jpeg,image/webp" multiple />
+        </div>
+        <button type="submit" class="btn-invite-soft">Choose / upload files</button>
+    </form>
+    <div class="media-list">
+        @for (var i = 0; i < Model.CoverPhotos.Count; i++)
+        {
+            var c = Model.CoverPhotos.ElementAt(i);
+            <div class="media-row">
+                <img src="@c.FilePath" alt="@c.Label" />
+                <strong>@c.Label</strong>
+                <div class="media-actions">
+                    <form asp-action="MoveCover" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <input type="hidden" name="direction" value="up" />
+                        <button type="submit" class="btn-row" @(i == 0 ? "disabled" : null)>Up</button>
+                    </form>
+                    <form asp-action="MoveCover" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <input type="hidden" name="direction" value="down" />
+                        <button type="submit" class="btn-row" @(i == Model.CoverPhotos.Count - 1 ? "disabled" : null)>Down</button>
+                    </form>
+                    <form asp-action="RemoveCover" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <button type="submit" class="btn-row delete">Remove</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
 @* —— Gallery —— *@
 <section class="invite-admin-card">
     <h2>Photo gallery</h2>
@@ -259,24 +303,10 @@
             <textarea asp-for="ScheduleTextKh" rows="4" placeholder="ម៉ោង ៣:០០ — ពិធីអាពាហ៍ពិពាហ៍&#10;ម៉ោង ៥:០០ — ពិធីជប់លៀង"></textarea>
         </div>
 
-        <div class="form-group image-or-url">
-            <label>Cover image</label>
-            <p class="muted sm-text">Upload a file <strong>or</strong> paste an image URL. Max ~900KB.</p>
-            @if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl) && !Model.CoverImageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
-            {
-                <div class="image-or-url-preview">
-                    <img src="@Model.CoverImageUrl" alt="Cover preview" />
-                </div>
-            }
-            <input type="file" name="coverImageFile" accept="image/png,image/jpeg,image/webp" />
-            <div class="image-or-url-or">or paste URL</div>
-            <input asp-for="CoverImageUrl" type="text" placeholder="https://… or leave blank after upload" />
-        </div>
-
         <div class="form-group">
             <label asp-for="MusicUrl">Music (optional)</label>
             <input asp-for="MusicUrl" placeholder="https://open.spotify.com/track/... or playlist URL" />
-            <p class="muted sm-text">Spotify embeds; other links show Listen.</p>
+            <p class="muted sm-text">Spotify embeds; other links show Listen. Cover images are managed in the <strong>Cover images</strong> card above.</p>
         </div>
     </div>
 

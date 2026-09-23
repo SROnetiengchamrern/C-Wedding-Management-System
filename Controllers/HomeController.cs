@@ -44,6 +44,7 @@ public class HomeController : Controller
                 WebId = w.WebId,
                 CoupleName = w.CoupleDisplayName,
                 WeddingDate = w.WeddingDate,
+                DateDisplayShort = w.DateDisplayShort,
                 VenueName = w.VenueName,
                 IsPublished = w.WebsiteSettings?.IsPublished == true,
                 Slug = w.WebsiteSettings?.Slug,

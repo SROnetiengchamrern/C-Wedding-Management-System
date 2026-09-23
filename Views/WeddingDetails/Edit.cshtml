@@ -24,8 +24,13 @@
             <input asp-for="Partner2Name" required />
         </div>
         <div class="form-group">
-            <label asp-for="WeddingDate">Wedding date</label>
-            <input asp-for="WeddingDate" type="date" />
+            <label asp-for="WeddingDate">Wedding date start</label>
+            <input asp-for="WeddingDate" type="date" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="WeddingDateEnd">Wedding date end (optional)</label>
+            <input asp-for="WeddingDateEnd" type="date" />
+            <p class="muted sm-text" style="margin:.4rem 0 0;">Leave empty if it is a one-day wedding. End must be on or after start.</p>
         </div>
         <div class="form-group">
             <label asp-for="VenueName">Venue</label>

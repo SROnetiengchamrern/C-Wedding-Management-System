@@ -25,7 +25,7 @@
         <h1>@Model.SiteTitle</h1>
         @if (Model.Wedding is not null)
         {
-            <p class="meta">@Model.Wedding.WeddingDate.ToString("MMMM d, yyyy") · @Model.Wedding.VenueName</p>
+            <p class="meta">@Model.Wedding.DateDisplayLong · @Model.Wedding.VenueName</p>
         }
         <p>@Model.WelcomeMessage</p>
         @if (!string.IsNullOrWhiteSpace(Model.RsvpUrl))

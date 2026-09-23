@@ -22,6 +22,7 @@ public class TotalsController : Controller
                 WebId = w.WebId,
                 CoupleName = w.Partner1Name + " & " + w.Partner2Name,
                 WeddingDate = w.WeddingDate,
+                WeddingDateEnd = w.WeddingDateEnd,
                 VenueName = w.VenueName,
                 GiftCount = w.WeddingGifts.Count,
                 TotalKhr = w.WeddingGifts.Sum(g => (decimal?)g.AmountKhr) ?? 0,

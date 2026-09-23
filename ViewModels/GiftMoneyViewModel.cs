@@ -25,6 +25,8 @@ public class GiftPartnerListItem
     public int WebId { get; set; }
     public string CoupleName { get; set; } = "";
     public DateTime WeddingDate { get; set; }
+    public DateTime? WeddingDateEnd { get; set; }
+    public string DateDisplayShort => WeddingManagementSystem.Models.Wedding.FormatDateShort(WeddingDate, WeddingDateEnd);
     public string? VenueName { get; set; }
     public int GiftCount { get; set; }
     public decimal TotalKhr { get; set; }

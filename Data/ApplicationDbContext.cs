@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     public DbSet<WebsiteSettings> WebsiteSettings => Set<WebsiteSettings>();
     public DbSet<WebsiteBankQr> WebsiteBankQrs => Set<WebsiteBankQr>();
     public DbSet<WebsiteGalleryPhoto> WebsiteGalleryPhotos => Set<WebsiteGalleryPhoto>();
+    public DbSet<WebsiteCoverPhoto> WebsiteCoverPhotos => Set<WebsiteCoverPhoto>();
     public DbSet<WebsiteRsvp> WebsiteRsvps => Set<WebsiteRsvp>();
     public DbSet<WeddingGift> WeddingGifts => Set<WeddingGift>();
 
@@ -56,6 +57,12 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
         modelBuilder.Entity<WebsiteGalleryPhoto>()
             .HasOne(x => x.WebsiteSettings)
             .WithMany(w => w.GalleryPhotos)
+            .HasForeignKey(x => x.WebsiteSettingsId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WebsiteCoverPhoto>()
+            .HasOne(x => x.WebsiteSettings)
+            .WithMany(w => w.CoverPhotos)
             .HasForeignKey(x => x.WebsiteSettingsId)
             .OnDelete(DeleteBehavior.Cascade);
 

@@ -38,7 +38,7 @@ else
         <div class="totals-meta">
             <strong>@s.CoupleName</strong>
             <span class="muted"> · web_id @s.WebId</span>
-            <span class="muted"> · @s.WeddingDate.ToString("MMM d, yyyy")</span>
+            <span class="muted"> · @s.DateDisplayShort</span>
             @if (!string.IsNullOrWhiteSpace(s.VenueName))
             {
                 <span class="muted"> · @s.VenueName</span>

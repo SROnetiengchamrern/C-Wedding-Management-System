@@ -21,6 +21,7 @@ public class DashboardCoupleRow
     public int WebId { get; set; }
     public string CoupleName { get; set; } = "";
     public DateTime WeddingDate { get; set; }
+    public string DateDisplayShort { get; set; } = "";
     public string? VenueName { get; set; }
     public bool IsPublished { get; set; }
     public string? Slug { get; set; }

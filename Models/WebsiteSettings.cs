@@ -96,4 +96,5 @@ public class WebsiteSettings
 
     public ICollection<WebsiteBankQr> BankQrs { get; set; } = new List<WebsiteBankQr>();
     public ICollection<WebsiteGalleryPhoto> GalleryPhotos { get; set; } = new List<WebsiteGalleryPhoto>();
+    public ICollection<WebsiteCoverPhoto> CoverPhotos { get; set; } = new List<WebsiteCoverPhoto>();
 }

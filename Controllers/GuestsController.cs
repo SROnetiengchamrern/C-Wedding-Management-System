@@ -20,6 +20,7 @@ public class GuestsController : Controller
                 WebId = w.WebId,
                 CoupleName = w.Partner1Name + " & " + w.Partner2Name,
                 WeddingDate = w.WeddingDate,
+                WeddingDateEnd = w.WeddingDateEnd,
                 GuestCount = w.Guests.Count,
                 Accepted = w.Guests.Count(g => g.RsvpStatus == RsvpStatus.Accepted),
                 Pending = w.Guests.Count(g => g.RsvpStatus == RsvpStatus.Pending),
@@ -86,6 +87,8 @@ public class GuestPartnerListItem
     public int WebId { get; set; }
     public string CoupleName { get; set; } = "";
     public DateTime WeddingDate { get; set; }
+    public DateTime? WeddingDateEnd { get; set; }
+    public string DateDisplayShort => WeddingManagementSystem.Models.Wedding.FormatDateShort(WeddingDate, WeddingDateEnd);
     public int GuestCount { get; set; }
     public int Accepted { get; set; }
     public int Pending { get; set; }
