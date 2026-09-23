@@ -1,0 +1,300 @@
+@using WeddingManagementSystem.Models
+@model WebsiteSettings
+@{
+    Layout = null;
+    var theme = InviteThemes.Get(Model.ThemeLayout);
+    var title = Model.SiteTitle;
+    var photos = Model.GalleryPhotos.OrderBy(p => p.SortOrder).ToList();
+    var backUrl = ViewBag.BackUrl as string ?? $"/w/{Model.Slug}#gallery";
+    var couple = Model.Wedding?.CoupleDisplayName ?? title;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gallery — @title</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Great+Vibes&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --inv-primary: @theme.Primary;
+            --inv-accent: @theme.Accent;
+            --inv-bg: @theme.Bg;
+            --inv-card: @theme.Card;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Source Sans 3", sans-serif;
+            background: var(--inv-bg);
+            color: @(theme.Id == 3 ? "#f3eadc" : "#2c241c");
+            min-height: 100vh;
+        }
+        .pg-top {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: color-mix(in srgb, var(--inv-card) 92%, transparent);
+            border-bottom: 1px solid color-mix(in srgb, var(--inv-primary) 12%, transparent);
+            backdrop-filter: blur(10px);
+        }
+        .pg-back {
+            appearance: none;
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 35%, transparent);
+            background: #fff;
+            color: var(--inv-primary);
+            font: inherit;
+            font-weight: 600;
+            font-size: 0.88rem;
+            padding: 0.45rem 0.95rem;
+            border-radius: 999px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .pg-top-title {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            text-align: right;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 55vw;
+        }
+        .pg-hero {
+            text-align: center;
+            padding: 1.75rem 1rem 1.25rem;
+        }
+        .pg-hero h1 {
+            margin: 0;
+            font-family: "Great Vibes", "Cormorant Garamond", cursive;
+            font-size: clamp(2.4rem, 8vw, 3.6rem);
+            font-weight: 400;
+            color: @(theme.Id == 3 ? "#f3eadc" : "#1a1a1a");
+            line-height: 1.1;
+        }
+        .pg-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 0.65rem;
+            color: var(--inv-primary);
+        }
+        .pg-divider::before,
+        .pg-divider::after {
+            content: "";
+            width: 48px;
+            height: 1px;
+            background: color-mix(in srgb, var(--inv-primary) 55%, transparent);
+        }
+        .pg-divider span {
+            font-size: 0.95rem;
+            line-height: 1;
+        }
+        .pg-masonry {
+            column-count: 4;
+            column-gap: 0;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 0 2.5rem;
+        }
+        .pg-item {
+            break-inside: avoid;
+            margin: 0;
+            position: relative;
+            display: block;
+            cursor: zoom-in;
+            background: var(--inv-primary);
+        }
+        .pg-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            vertical-align: top;
+        }
+        .pg-item::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(20, 10, 14, 0.0);
+            transition: background 0.25s ease;
+            pointer-events: none;
+        }
+        .pg-zoom {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .pg-zoom i {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--inv-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: normal;
+            font-size: 1.15rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,.18);
+        }
+        .pg-item:hover::after { background: rgba(20, 10, 14, 0.28); }
+        .pg-item:hover .pg-zoom { opacity: 1; }
+        .pg-lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(12, 8, 10, 0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .pg-lightbox.is-open { display: flex; }
+        .pg-lightbox img {
+            max-width: min(96vw, 1100px);
+            max-height: 88vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.45);
+        }
+        .pg-lb-close,
+        .pg-lb-nav {
+            position: absolute;
+            appearance: none;
+            border: 0;
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pg-lb-close { top: 1rem; right: 1rem; }
+        .pg-lb-prev { left: 0.75rem; top: 50%; transform: translateY(-50%); }
+        .pg-lb-next { right: 0.75rem; top: 50%; transform: translateY(-50%); }
+        .pg-lb-cap {
+            position: absolute;
+            left: 50%;
+            bottom: 1rem;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 0.9rem;
+            opacity: 0.85;
+            text-align: center;
+            max-width: 90vw;
+        }
+        @@media (max-width: 980px) {
+            .pg-masonry { column-count: 3; }
+        }
+        @@media (max-width: 640px) {
+            .pg-masonry { column-count: 2; }
+            .pg-hero { padding: 1.25rem 1rem 1rem; }
+            .pg-lb-prev, .pg-lb-next { width: 38px; height: 38px; font-size: 1.05rem; }
+        }
+        @@media (max-width: 380px) {
+            .pg-masonry { column-count: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="pg-top">
+        <a class="pg-back" href="@backUrl">‹ Back to invite</a>
+        <div class="pg-top-title">@couple</div>
+    </div>
+
+    <header class="pg-hero">
+        <h1>Gallery</h1>
+        <div class="pg-divider" aria-hidden="true"><span>♥</span></div>
+    </header>
+
+    <div class="pg-masonry" id="pgMasonry">
+        @for (var i = 0; i < photos.Count; i++)
+        {
+            var p = photos[i];
+            var label = string.IsNullOrWhiteSpace(p.Label) ? $"Photo {i + 1}" : p.Label;
+            <button type="button" class="pg-item" data-index="@i" data-src="@p.FilePath" data-label="@label" aria-label="View @label">
+                <img src="@p.FilePath" alt="@label" loading="@(i < 6 ? "eager" : "lazy")" />
+                <span class="pg-zoom"><i>⌕</i></span>
+            </button>
+        }
+    </div>
+
+    <div class="pg-lightbox" id="pgLightbox" aria-hidden="true">
+        <button type="button" class="pg-lb-close" id="pgClose" aria-label="Close">×</button>
+        <button type="button" class="pg-lb-nav pg-lb-prev" id="pgPrev" aria-label="Previous">‹</button>
+        <img id="pgLbImg" src="" alt="" />
+        <button type="button" class="pg-lb-nav pg-lb-next" id="pgNext" aria-label="Next">›</button>
+        <div class="pg-lb-cap" id="pgLbCap"></div>
+    </div>
+
+    <script>
+        (function () {
+            var items = Array.prototype.slice.call(document.querySelectorAll('.pg-item'));
+            var lb = document.getElementById('pgLightbox');
+            var img = document.getElementById('pgLbImg');
+            var cap = document.getElementById('pgLbCap');
+            var idx = 0;
+            if (!items.length || !lb || !img) return;
+
+            function openAt(i) {
+                idx = (i + items.length) % items.length;
+                var el = items[idx];
+                img.src = el.getAttribute('data-src') || '';
+                img.alt = el.getAttribute('data-label') || '';
+                if (cap) cap.textContent = (el.getAttribute('data-label') || '') + ' · ' + (idx + 1) + ' / ' + items.length;
+                lb.classList.add('is-open');
+                lb.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+            function close() {
+                lb.classList.remove('is-open');
+                lb.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            items.forEach(function (el) {
+                el.addEventListener('click', function () {
+                    openAt(parseInt(el.getAttribute('data-index') || '0', 10));
+                });
+            });
+            document.getElementById('pgClose')?.addEventListener('click', close);
+            document.getElementById('pgPrev')?.addEventListener('click', function (e) {
+                e.stopPropagation();
+                openAt(idx - 1);
+            });
+            document.getElementById('pgNext')?.addEventListener('click', function (e) {
+                e.stopPropagation();
+                openAt(idx + 1);
+            });
+            lb.addEventListener('click', function (e) {
+                if (e.target === lb) close();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (!lb.classList.contains('is-open')) return;
+                if (e.key === 'Escape') close();
+                if (e.key === 'ArrowLeft') openAt(idx - 1);
+                if (e.key === 'ArrowRight') openAt(idx + 1);
+            });
+        })();
+    </script>
+</body>
+</html>

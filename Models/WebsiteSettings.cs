@@ -61,6 +61,34 @@ public class WebsiteSettings
     [MaxLength(1000)]
     public string? CoverImageUrl { get; set; }
 
+    [MaxLength(40)]
+    public string? Partner1Title { get; set; }
+
+    [MaxLength(40)]
+    public string? Partner2Title { get; set; }
+
+    [MaxLength(1000)]
+    public string? Partner1PhotoUrl { get; set; }
+
+    [MaxLength(1000)]
+    public string? Partner2PhotoUrl { get; set; }
+
+    public DateTime? Partner1BirthDate { get; set; }
+
+    public DateTime? Partner2BirthDate { get; set; }
+
+    [MaxLength(1000)]
+    public string? Partner1Bio { get; set; }
+
+    [MaxLength(1000)]
+    public string? Partner1BioKh { get; set; }
+
+    [MaxLength(1000)]
+    public string? Partner2Bio { get; set; }
+
+    [MaxLength(1000)]
+    public string? Partner2BioKh { get; set; }
+
     [MaxLength(500)]
     public string? MusicUrl { get; set; }
 

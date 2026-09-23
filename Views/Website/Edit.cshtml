@@ -282,6 +282,72 @@
 
     <hr class="invite-divider" />
 
+    <h2>The Couple</h2>
+    <p class="muted sm-text">Shown on the public invite. Names come from Wedding Details (@couple). Leave empty to hide the section.</p>
+    <div class="invite-form-grid">
+        <div class="form-group">
+            <label asp-for="Partner1Title">Partner 1 title</label>
+            <input asp-for="Partner1Title" placeholder="Groom" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Partner2Title">Partner 2 title</label>
+            <input asp-for="Partner2Title" placeholder="Bride" />
+        </div>
+
+        <div class="form-group image-or-url">
+            <label>Partner 1 photo</label>
+            @if (!string.IsNullOrWhiteSpace(Model.Partner1PhotoUrl) && !Model.Partner1PhotoUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="image-or-url-preview">
+                    <img src="@Model.Partner1PhotoUrl" alt="Partner 1" style="border-radius:50%;width:96px;height:96px;object-fit:cover;" />
+                </div>
+            }
+            <input type="file" name="partner1PhotoFile" accept="image/png,image/jpeg,image/webp" />
+            <div class="image-or-url-or">or paste URL</div>
+            <input asp-for="Partner1PhotoUrl" type="text" placeholder="https://… or leave blank after upload" />
+        </div>
+        <div class="form-group image-or-url">
+            <label>Partner 2 photo</label>
+            @if (!string.IsNullOrWhiteSpace(Model.Partner2PhotoUrl) && !Model.Partner2PhotoUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="image-or-url-preview">
+                    <img src="@Model.Partner2PhotoUrl" alt="Partner 2" style="border-radius:50%;width:96px;height:96px;object-fit:cover;" />
+                </div>
+            }
+            <input type="file" name="partner2PhotoFile" accept="image/png,image/jpeg,image/webp" />
+            <div class="image-or-url-or">or paste URL</div>
+            <input asp-for="Partner2PhotoUrl" type="text" placeholder="https://… or leave blank after upload" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Partner1BirthDate">Partner 1 birth date</label>
+            <input asp-for="Partner1BirthDate" type="date" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Partner2BirthDate">Partner 2 birth date</label>
+            <input asp-for="Partner2BirthDate" type="date" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Partner1Bio">Partner 1 bio (English)</label>
+            <textarea asp-for="Partner1Bio" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="Partner2Bio">Partner 2 bio (English)</label>
+            <textarea asp-for="Partner2Bio" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="Partner1BioKh">Partner 1 bio (ខ្មែរ)</label>
+            <textarea asp-for="Partner1BioKh" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="Partner2BioKh">Partner 2 bio (ខ្មែរ)</label>
+            <textarea asp-for="Partner2BioKh" rows="3"></textarea>
+        </div>
+    </div>
+
+    <hr class="invite-divider" />
+
     <h2>Site &amp; share details</h2>
     <div class="invite-form-grid">
         <div class="form-group">

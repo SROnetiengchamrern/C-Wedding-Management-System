@@ -139,7 +139,9 @@ public class WebsiteController : Controller
     public async Task<IActionResult> Save(
         WebsiteSettings model,
         IFormFile? coverImageFile,
-        IFormFile? shareImageFile)
+        IFormFile? shareImageFile,
+        IFormFile? partner1PhotoFile,
+        IFormFile? partner2PhotoFile)
     {
         var settings = await _db.WebsiteSettings.FindAsync(model.Id);
         if (settings is null) return NotFound();
@@ -159,6 +161,14 @@ public class WebsiteController : Controller
         settings.DressCodeKh = model.DressCodeKh;
         settings.ScheduleText = model.ScheduleText;
         settings.ScheduleTextKh = model.ScheduleTextKh;
+        settings.Partner1Title = Truncate(model.Partner1Title, 40);
+        settings.Partner2Title = Truncate(model.Partner2Title, 40);
+        settings.Partner1BirthDate = model.Partner1BirthDate;
+        settings.Partner2BirthDate = model.Partner2BirthDate;
+        settings.Partner1Bio = Truncate(model.Partner1Bio, 1000);
+        settings.Partner1BioKh = Truncate(model.Partner1BioKh, 1000);
+        settings.Partner2Bio = Truncate(model.Partner2Bio, 1000);
+        settings.Partner2BioKh = Truncate(model.Partner2BioKh, 1000);
         settings.MusicUrl = model.MusicUrl;
         settings.IsPublished = model.IsPublished;
 
@@ -166,6 +176,10 @@ public class WebsiteController : Controller
             coverImageFile, model.CoverImageUrl, settings.CoverImageUrl, "cover");
         settings.ShareImageUrl = await ResolveImageAsync(
             shareImageFile, model.ShareImageUrl, settings.ShareImageUrl, "share");
+        settings.Partner1PhotoUrl = await ResolveImageAsync(
+            partner1PhotoFile, model.Partner1PhotoUrl, settings.Partner1PhotoUrl, "couple");
+        settings.Partner2PhotoUrl = await ResolveImageAsync(
+            partner2PhotoFile, model.Partner2PhotoUrl, settings.Partner2PhotoUrl, "couple");
 
         if (string.IsNullOrWhiteSpace(settings.ShareImageUrl) && !string.IsNullOrWhiteSpace(settings.CoverImageUrl))
             settings.ShareImageUrl = settings.CoverImageUrl;
@@ -173,6 +187,13 @@ public class WebsiteController : Controller
         await _db.SaveChangesAsync();
         TempData["Ok"] = "Website settings saved.";
         return BackToEdit(settings.WeddingId);
+    }
+
+    private static string? Truncate(string? value, int max)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        value = value.Trim();
+        return value.Length > max ? value[..max] : value;
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -445,6 +466,38 @@ public class WebsiteController : Controller
         settings.BankQrs = settings.BankQrs.OrderBy(x => x.SortOrder).ToList();
         settings.GalleryPhotos = settings.GalleryPhotos.OrderBy(x => x.SortOrder).ToList();
         return View(settings);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("/w/{slug}/gallery")]
+    public async Task<IActionResult> PublicGallery(string slug)
+    {
+        var settings = await _db.WebsiteSettings
+            .Include(w => w.Wedding)
+            .Include(w => w.GalleryPhotos)
+            .FirstOrDefaultAsync(w => w.Slug == slug);
+
+        if (settings is null || !settings.IsPublished) return NotFound();
+
+        settings.GalleryPhotos = settings.GalleryPhotos.OrderBy(x => x.SortOrder).ToList();
+        if (!settings.GalleryPhotos.Any()) return RedirectToAction(nameof(Public), new { slug });
+
+        ViewBag.BackUrl = $"/w/{settings.Slug}#gallery";
+        return View(settings);
+    }
+
+    public async Task<IActionResult> PreviewGallery(int weddingId)
+    {
+        var settings = await GetOrCreateSettingsAsync(weddingId);
+        if (settings is null) return NotFound();
+
+        await LoadMediaAsync(settings);
+        await _db.Entry(settings).Reference(s => s.Wedding).LoadAsync();
+        if (!settings.GalleryPhotos.Any())
+            return RedirectToAction(nameof(Preview), new { weddingId });
+
+        ViewBag.BackUrl = $"/Website/Preview?weddingId={weddingId}#gallery";
+        return View("PublicGallery", settings);
     }
 
     [AllowAnonymous]
