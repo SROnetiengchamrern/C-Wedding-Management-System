@@ -1,0 +1,73 @@
+@model List<WeddingManagementSystem.Models.WebsiteRsvp>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>RSVP list — Print / PDF</title>
+    <style>
+        body { font-family: "Segoe UI", Arial, sans-serif; padding: 24px; color: #222; }
+        h1 { text-align: center; color: #9b2c4a; margin-bottom: 4px; }
+        .sums { display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap; }
+        .sums div { padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border: 1px solid #bbb; padding: 6px 8px; text-align: left; vertical-align: top; }
+        th { background: #eee; }
+        @@media print {
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()" style="margin-bottom:12px;padding:8px 14px;">Print / Save as PDF</button>
+    <h1>RSVP replies</h1>
+    @if (ViewBag.CoupleName is string couple)
+    {
+        <p style="text-align:center;margin-top:0;">@couple @if (ViewBag.WebId is int webId) { <span>· web_id: @webId</span> }</p>
+    }
+    <div class="sums">
+        <div>Accepted: <strong>@(ViewBag.Accepted ?? 0)</strong></div>
+        <div>Declined: <strong>@(ViewBag.Declined ?? 0)</strong></div>
+        <div>Maybe: <strong>@(ViewBag.Maybe ?? 0)</strong></div>
+        <div>Total: <strong>@Model.Count</strong></div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Reply</th>
+                <th>Message</th>
+                <th>Dietary</th>
+                <th>When</th>
+            </tr>
+        </thead>
+        <tbody>
+        @{ var i = 1; }
+        @foreach (var r in Model)
+        {
+            var replyLabel = r.Reply switch
+            {
+                RsvpStatus.Accepted => "Joyfully accepts",
+                RsvpStatus.Declined => "Regretfully declines",
+                RsvpStatus.Maybe => "Not sure yet",
+                _ => r.Reply.ToString()
+            };
+            <tr>
+                <td>@i</td>
+                <td>@r.FullName</td>
+                <td>@(r.Email ?? "")</td>
+                <td>@replyLabel</td>
+                <td>@r.Message</td>
+                <td>@r.DietaryNotes</td>
+                <td>@r.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
+            </tr>
+            i++;
+        }
+        </tbody>
+    </table>
+</body>
+</html>

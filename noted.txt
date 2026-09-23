@@ -6,7 +6,7 @@ dotnet ef database update
 dotnet build
 dotnet run
 
-
+dotnet run --urls "http://192.168.56.1:5688"
 Short version (copy-paste)
 cd D:\path\to\WeddingManagementSystem
 dotnet restore

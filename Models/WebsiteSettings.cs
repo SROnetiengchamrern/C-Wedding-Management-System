@@ -17,6 +17,9 @@ public class WebsiteSettings
     [MaxLength(1000)]
     public string? WelcomeMessage { get; set; }
 
+    [MaxLength(1000)]
+    public string? WelcomeMessageKh { get; set; }
+
     [MaxLength(500)]
     public string? RsvpUrl { get; set; }
 
@@ -29,6 +32,9 @@ public class WebsiteSettings
     /// <summary>Invite layout theme 1–7.</summary>
     public int ThemeLayout { get; set; } = 6;
 
+    /// <summary>Falling overlay effect: 0=None, 1=Hearts+Snow, 2=Hearts, 3=Snow, 4=Petals, 5=Sparkles.</summary>
+    public int EffectStyle { get; set; } = InviteEffects.HeartsSnow;
+
     public bool ShowMap { get; set; } = true;
 
     [MaxLength(300)]
@@ -36,6 +42,21 @@ public class WebsiteSettings
 
     [MaxLength(2000)]
     public string? InviteMessage { get; set; }
+
+    [MaxLength(2000)]
+    public string? InviteMessageKh { get; set; }
+
+    [MaxLength(500)]
+    public string? DressCode { get; set; }
+
+    [MaxLength(500)]
+    public string? DressCodeKh { get; set; }
+
+    [MaxLength(2000)]
+    public string? ScheduleText { get; set; }
+
+    [MaxLength(2000)]
+    public string? ScheduleTextKh { get; set; }
 
     [MaxLength(1000)]
     public string? CoverImageUrl { get; set; }

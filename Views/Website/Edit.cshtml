@@ -75,6 +75,29 @@
     </form>
 </section>
 
+@* —— Invite effect —— *@
+<section class="invite-admin-card">
+    <h2>Invite effect</h2>
+    <p class="muted">Choose one favorite effect for the public invite (loading heart + falling overlay). Select <strong>None</strong> to turn falling off. This save does not change other settings.</p>
+    <form asp-action="SaveEffect" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div class="effect-options" id="effectOptions">
+            @foreach (var fx in InviteEffects.All)
+            {
+                <label class="effect-option @(Model.EffectStyle == fx.Id ? "selected" : "")">
+                    <input type="radio" name="effectStyle" value="@fx.Id" @(Model.EffectStyle == fx.Id ? "checked" : null) />
+                    <span>
+                        <strong>@fx.Name</strong>
+                        <small>@fx.Description</small>
+                    </span>
+                </label>
+            }
+        </div>
+        <button type="submit" class="btn-invite-primary">Save effect</button>
+    </form>
+</section>
+
 @* —— Bank QR —— *@
 <section class="invite-admin-card">
     <h2>Bank transfer QR (QR_CODE_BANK)</h2>
@@ -209,8 +232,31 @@
 
     <div class="invite-form-grid">
         <div class="form-group span-2">
-            <label asp-for="InviteMessage">Message</label>
+            <label asp-for="InviteMessage">Message (English)</label>
             <textarea asp-for="InviteMessage" rows="3"></textarea>
+        </div>
+        <div class="form-group span-2">
+            <label asp-for="InviteMessageKh">Message (ខ្មែរ)</label>
+            <textarea asp-for="InviteMessageKh" rows="3" placeholder="សារអញ្ជើញជាភាសាខ្មែរ…"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="DressCode">Dress code (English)</label>
+            <input asp-for="DressCode" placeholder="e.g. Formal / Traditional Khmer attire" />
+        </div>
+        <div class="form-group">
+            <label asp-for="DressCodeKh">Dress code (ខ្មែរ)</label>
+            <input asp-for="DressCodeKh" placeholder="ឧ. សម្លៀកបំពាក់ផ្លូវការ / អាវសូត្រខ្មែរ" />
+        </div>
+
+        <div class="form-group span-2">
+            <label asp-for="ScheduleText">Schedule (English)</label>
+            <textarea asp-for="ScheduleText" rows="4" placeholder="3:00 PM — Ceremony&#10;5:00 PM — Reception"></textarea>
+            <p class="muted sm-text">One event per line.</p>
+        </div>
+        <div class="form-group span-2">
+            <label asp-for="ScheduleTextKh">Schedule (ខ្មែរ)</label>
+            <textarea asp-for="ScheduleTextKh" rows="4" placeholder="ម៉ោង ៣:០០ — ពិធីអាពាហ៍ពិពាហ៍&#10;ម៉ោង ៥:០០ — ពិធីជប់លៀង"></textarea>
         </div>
 
         <div class="form-group image-or-url">
@@ -247,8 +293,12 @@
             <input asp-for="Slug" />
         </div>
         <div class="form-group">
-            <label asp-for="WelcomeMessage">Welcome message</label>
+            <label asp-for="WelcomeMessage">Welcome message (English)</label>
             <textarea asp-for="WelcomeMessage" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="WelcomeMessageKh">Welcome message (ខ្មែរ)</label>
+            <textarea asp-for="WelcomeMessageKh" rows="3" placeholder="សារស្វាគមន៍ជាភាសាខ្មែរ…"></textarea>
         </div>
         <div class="form-group">
             <label asp-for="ShareDescription">Share description (for friends)</label>
@@ -312,10 +362,26 @@
 
 @{
     var rsvps = ViewBag.Rsvps as IEnumerable<WebsiteRsvp> ?? Enumerable.Empty<WebsiteRsvp>();
+    var rsvpList = rsvps.ToList();
+    var acceptedCount = rsvpList.Count(r => r.Reply == RsvpStatus.Accepted);
+    var declinedCount = rsvpList.Count(r => r.Reply == RsvpStatus.Declined);
+    var maybeCount = rsvpList.Count(r => r.Reply == RsvpStatus.Maybe);
 }
 <section class="invite-admin-card">
     <h2>RSVP replies</h2>
     <p class="muted">Guests send these from the public invite. Replies also update Guest Management.</p>
+    <div class="rsvp-export-bar">
+        <div class="rsvp-counts">
+            <span>Accepted <strong>@acceptedCount</strong></span>
+            <span>Declined <strong>@declinedCount</strong></span>
+            <span>Maybe <strong>@maybeCount</strong></span>
+            <span>Total <strong>@rsvpList.Count</strong></span>
+        </div>
+        <div class="export-btns">
+            <a class="btn-export" asp-action="ExportRsvpPdf" asp-route-weddingId="@Model.WeddingId" target="_blank">PDF</a>
+            <a class="btn-export xlsx" asp-action="ExportRsvpExcel" asp-route-weddingId="@Model.WeddingId">Excel</a>
+        </div>
+    </div>
     <div class="rsvp-table-wrap">
         <table id="rsvpDataTable" class="rsvp-table display" style="width:100%">
             <thead>
@@ -328,7 +394,7 @@
                 </tr>
             </thead>
             <tbody>
-            @foreach (var r in rsvps)
+            @foreach (var r in rsvpList)
             {
                 var replyLabel = r.Reply switch
                 {
@@ -372,6 +438,17 @@
                     input.addEventListener('change', function () {
                         root.querySelectorAll('label').forEach(function (label) {
                             label.classList.toggle('on', label.querySelector('input') === input && input.checked);
+                        });
+                    });
+                });
+            }
+
+            var effects = document.getElementById('effectOptions');
+            if (effects) {
+                effects.querySelectorAll('input[type=radio]').forEach(function (input) {
+                    input.addEventListener('change', function () {
+                        effects.querySelectorAll('.effect-option').forEach(function (label) {
+                            label.classList.toggle('selected', label.querySelector('input') === input && input.checked);
                         });
                     });
                 });

@@ -23,10 +23,22 @@
     string? spotifyEmbed = null;
     if (isSpotify && Model.MusicUrl is not null)
     {
-        spotifyEmbed = Model.MusicUrl
-            .Replace("open.spotify.com/", "open.spotify.com/embed/")
-            .Split('?')[0];
+        var embedPath = Model.MusicUrl
+            .Replace("open.spotify.com/", "open.spotify.com/embed/", StringComparison.OrdinalIgnoreCase)
+            .Split('?', '#')[0]
+            .TrimEnd('/');
+        spotifyEmbed = embedPath + "?utm_source=generator&theme=0&autoplay=1";
     }
+    var hasMusic = !string.IsNullOrWhiteSpace(Model.MusicUrl);
+    var hasDress = !string.IsNullOrWhiteSpace(Model.DressCode) || !string.IsNullOrWhiteSpace(Model.DressCodeKh);
+    var hasSchedule = !string.IsNullOrWhiteSpace(Model.ScheduleText) || !string.IsNullOrWhiteSpace(Model.ScheduleTextKh);
+    var hasKhText =
+        !string.IsNullOrWhiteSpace(Model.WelcomeMessageKh) ||
+        !string.IsNullOrWhiteSpace(Model.InviteMessageKh) ||
+        !string.IsNullOrWhiteSpace(Model.DressCodeKh) ||
+        !string.IsNullOrWhiteSpace(Model.ScheduleTextKh);
+    string Pick(string? en, string? kh) =>
+        !string.IsNullOrWhiteSpace(en) ? en! : (kh ?? "");
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -51,7 +63,7 @@
     {
         <meta name="twitter:image" content="@image" />
     }
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Hanuman:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
     <style>
         :root {
             --inv-primary: @theme.Primary;
@@ -105,9 +117,21 @@
             align-items: center;
             justify-content: center;
             gap: 1rem;
-            background: radial-gradient(ellipse at center, #2a1520 0%, #12080c 70%);
+            background: radial-gradient(ellipse at center, var(--loader-mid, #2a1520) 0%, var(--loader-deep, #12080c) 70%);
             color: #fff;
             transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+        body[data-effect="3"] .inv-loader {
+            --loader-mid: #1a2430;
+            --loader-deep: #0a1018;
+        }
+        body[data-effect="5"] .inv-loader {
+            --loader-mid: #2a2010;
+            --loader-deep: #120c06;
+        }
+        body[data-effect="4"] .inv-loader {
+            --loader-mid: #2a1018;
+            --loader-deep: #14060c;
         }
         .inv-loader.is-done {
             opacity: 0;
@@ -122,7 +146,7 @@
             text-align: center;
             padding: 0 1rem;
             position: relative;
-            z-index: 101;
+            z-index: 102;
             text-shadow: 0 4px 24px rgba(238, 82, 130, 0.45);
         }
         .inv-loader-sub {
@@ -192,6 +216,98 @@
             color: var(--inv-primary);
             font-size: 1.55rem;
             margin: 0 0 .75rem;
+        }
+        .inv-lang {
+            position: fixed;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 50;
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.2rem;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--inv-card) 92%, transparent);
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 18%, transparent);
+            box-shadow: 0 8px 24px rgba(0,0,0,.08);
+            backdrop-filter: blur(8px);
+        }
+        body.inv-loading .inv-lang { opacity: 0; pointer-events: none; }
+        body.inv-ready .inv-lang { opacity: 1; transition: opacity .4s ease; }
+        .inv-lang button {
+            border: 0;
+            background: transparent;
+            color: var(--inv-primary);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+        .inv-lang button.is-active {
+            background: linear-gradient(180deg, var(--inv-accent), var(--inv-primary));
+            color: #fff;
+        }
+        body.lang-kh .inv-kh-font,
+        body.lang-kh .i18n {
+            font-family: "Hanuman", "Source Sans 3", sans-serif;
+            line-height: 1.65;
+        }
+        .schedule-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.55rem;
+        }
+        .schedule-list li {
+            padding: 0.75rem 0.9rem;
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--inv-accent) 12%, var(--inv-card));
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 12%, transparent);
+            font-size: 0.95rem;
+            display: grid;
+            gap: 0.2rem;
+        }
+        .schedule-list .schedule-time {
+            font-weight: 700;
+            color: var(--inv-primary);
+            font-size: 0.88rem;
+            letter-spacing: 0.02em;
+        }
+        .schedule-list .schedule-event {
+            line-height: 1.4;
+        }
+        .inv-info-pair {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1.35rem;
+        }
+        .inv-info-pair > .inv-section {
+            margin-top: 0;
+            padding: 1rem 1.05rem;
+            border-radius: 16px;
+            background: color-mix(in srgb, var(--inv-card) 88%, transparent);
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 12%, transparent);
+        }
+        @@media (min-width: 560px) {
+            .inv-info-pair {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+        }
+        body.lang-kh .lang-panel.lang-en { display: none !important; }
+        body:not(.lang-kh) .lang-panel.lang-kh { display: none !important; }
+        .lang-panel[hidden] { display: none !important; }
+        .dress-code-text {
+            margin: 0;
+            font-size: 1.05rem;
+            line-height: 1.55;
+        }
+        .inv-dock-info {
+            background: color-mix(in srgb, var(--inv-accent) 22%, var(--inv-card));
+            color: var(--inv-primary);
         }
 
         /* Scroll reveal (up & down) */
@@ -295,33 +411,86 @@
             .octagon-item { max-width: 140px; }
         }
 
-        .gallery-carousel {
+        .gallery-3d {
             background: var(--inv-card);
-            border-radius: 16px;
+            border-radius: 20px;
             border: 1px solid color-mix(in srgb, var(--inv-primary) 15%, transparent);
-            padding: 1rem 1rem 1.15rem;
+            padding: 1.5rem 1rem 1.25rem;
             text-align: center;
+            overflow: hidden;
         }
-        .gallery-slides { position: relative; min-height: 220px; }
-        .gallery-slide {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: .55rem;
-            animation: invFade .25s ease;
+        .gallery-3d-stage {
+            position: relative;
+            height: clamp(260px, 56vw, 360px);
+            margin: 0.35rem 0 0.25rem;
+            perspective: 1100px;
+            perspective-origin: 50% 50%;
+            touch-action: pan-y;
+            user-select: none;
         }
-        .gallery-slide.active { display: flex; }
-        .gallery-slide img {
-            width: 100%;
-            max-height: 320px;
-            object-fit: cover;
-            border-radius: 12px;
-            background: #fff;
-        }
-        .gallery-slide figcaption {
-            font-size: .9rem;
-            opacity: .8;
+        .gallery-3d-card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: min(52%, 240px);
+            aspect-ratio: 3 / 4;
             margin: 0;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #1a1216;
+            box-shadow: 0 14px 32px rgba(44, 20, 30, 0.18);
+            transform: translate(-50%, -50%);
+            transform-style: preserve-3d;
+            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                        filter 0.45s ease,
+                        opacity 0.45s ease,
+                        box-shadow 0.45s ease;
+            will-change: transform, filter, opacity;
+            cursor: pointer;
+        }
+        .gallery-3d-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+        .gallery-3d-card.is-active {
+            box-shadow: 0 18px 40px rgba(44, 20, 30, 0.26);
+            cursor: default;
+        }
+        .gallery-3d-card.is-far {
+            pointer-events: none;
+        }
+        .gallery-3d-caption {
+            margin: 1rem 0 0.65rem;
+            min-height: 1.35em;
+            font-size: 0.92rem;
+            color: color-mix(in srgb, var(--inv-primary) 55%, #666);
+            opacity: 0.9;
+            transition: opacity 0.25s ease;
+        }
+        .gallery-3d .inv-carousel-controls {
+            margin-top: 0.15rem;
+            margin-bottom: 0.15rem;
+        }
+        @@media (max-width: 560px) {
+            .gallery-3d {
+                padding: 1.25rem 0.75rem 1.1rem;
+            }
+            .gallery-3d-card { width: min(58%, 200px); }
+            .gallery-3d-stage {
+                height: clamp(240px, 70vw, 310px);
+                margin: 0.25rem 0;
+            }
+            .gallery-3d-caption {
+                margin: 0.85rem 0 0.55rem;
+            }
+        }
+        @@media (prefers-reduced-motion: reduce) {
+            .gallery-3d-card {
+                transition: opacity 0.25s ease;
+            }
         }
         .qr-carousel {
             background: var(--inv-card);
@@ -393,7 +562,89 @@
             min-width: 3.5rem;
         }
         .music-box { margin-top: .5rem; }
-        .music-box iframe { width: 100%; height: 80px; border-radius: 12px; border: 0; }
+        .music-box iframe {
+            width: 100%;
+            height: 152px;
+            border-radius: 12px;
+            border: 0;
+        }
+        .music-float {
+            position: fixed;
+            right: 1rem;
+            bottom: 4.6rem;
+            z-index: 60;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 999px;
+            border: 0;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, var(--inv-accent), var(--inv-primary));
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(0,0,0,.18);
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+        body.inv-ready .music-float { display: inline-flex; }
+        .music-float.is-playing { animation: musicPulse 1.4s ease-in-out infinite; }
+        .music-float-tip {
+            position: fixed;
+            right: 4.3rem;
+            bottom: 5.05rem;
+            z-index: 60;
+            background: rgba(44, 36, 28, .88);
+            color: #fff;
+            font-size: .78rem;
+            padding: .4rem .7rem;
+            border-radius: 999px;
+            display: none;
+            white-space: nowrap;
+        }
+        body.inv-ready .music-float-tip.is-on { display: block; }
+        @@keyframes musicPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        .inv-thanks {
+            margin-top: 2rem;
+            padding: 1.75rem 1.25rem 2rem;
+            text-align: center;
+            border-radius: 18px;
+            background: color-mix(in srgb, var(--inv-accent) 12%, var(--inv-card));
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 14%, transparent);
+        }
+        .inv-thanks-title {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.8rem;
+            color: var(--inv-primary);
+            margin: 0 0 .35rem;
+        }
+        .inv-thanks-text {
+            margin: 0;
+            line-height: 1.5;
+            opacity: .85;
+        }
+        .scroll-top {
+            position: fixed;
+            left: 1rem;
+            bottom: 4.6rem;
+            z-index: 60;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 999px;
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 25%, transparent);
+            background: rgba(255,255,255,.94);
+            color: var(--inv-primary);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,.12);
+        }
+        body.inv-ready .scroll-top.is-on { display: inline-flex; }
         .map-frame {
             border: 0;
             width: 100%;
@@ -541,16 +792,98 @@
             background: #ecd9f2;
             color: #5a2d6b;
         }
+        .inv-dock-countdown {
+            background: #fde2ea;
+            color: #9f1239;
+        }
+        .inv-dock-share {
+            background: #e4f0ff;
+            color: #1e4a7a;
+        }
         .inv-dock-moments {
             background: #f5ddd0;
             color: #6b3a28;
         }
+
+        /* Countdown + share */
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .65rem;
+        }
+        .countdown-box {
+            background: var(--inv-card);
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 15%, transparent);
+            border-radius: 14px;
+            padding: .9rem .5rem;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,.04);
+        }
+        .countdown-box strong {
+            display: block;
+            font-family: "Cormorant Garamond", serif;
+            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            color: var(--inv-primary);
+            line-height: 1;
+        }
+        .countdown-box span {
+            display: block;
+            margin-top: .35rem;
+            font-size: .72rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            opacity: .7;
+        }
+        .countdown-done {
+            text-align: center;
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.4rem;
+            color: var(--inv-primary);
+            margin: 0;
+        }
+        .share-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .55rem;
+        }
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            border-radius: 999px;
+            padding: .55rem 1rem;
+            font-size: .88rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid color-mix(in srgb, var(--inv-primary) 20%, transparent);
+            background: var(--inv-card);
+            color: inherit;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .share-btn:hover { filter: brightness(.97); }
+        .share-btn.primary {
+            background: linear-gradient(180deg, var(--inv-accent), var(--inv-primary));
+            color: #fff;
+            border-color: transparent;
+        }
+        .share-hint {
+            margin: .65rem 0 0;
+            font-size: .85rem;
+            opacity: .7;
+            min-height: 1.2em;
+        }
+        @@media (max-width: 480px) {
+            .countdown-grid { gap: .45rem; }
+            .countdown-box { padding: .7rem .3rem; }
+        }
+
         @@media (max-width: 420px) {
             .inv-dock { gap: .3rem; padding: .35rem .4rem; }
             .inv-dock a { padding: .42rem .72rem; font-size: .68rem; letter-spacing: .04em; }
         }
 
-        /* Falling hearts + soft snow */
+        /* Falling overlay effects */
         #heartSnow {
             position: fixed;
             inset: 0;
@@ -560,7 +893,12 @@
             opacity: 0;
             transition: opacity 0.8s ease;
         }
-        body.inv-ready #heartSnow { opacity: 1; }
+        body.inv-loading #heartSnow.has-effect,
+        body.inv-ready #heartSnow.has-effect { opacity: 1; }
+        body.inv-loading #heartSnow {
+            z-index: 101;
+            opacity: 0.55;
+        }
         .fall-item {
             position: absolute;
             top: -12vh;
@@ -590,6 +928,35 @@
             background: rgba(255, 190, 210, 0.85);
             box-shadow: 0 0 8px rgba(238, 82, 130, 0.35);
         }
+        .fall-petal {
+            width: 12px;
+            height: 16px;
+            border-radius: 80% 0 55% 50% / 55% 0 80% 50%;
+            background: linear-gradient(145deg, #f9a8c4, #e11d48);
+            opacity: 0.85;
+            box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
+        }
+        .fall-petal.is-soft {
+            background: linear-gradient(145deg, #fecdd3, #fb7185);
+        }
+        .fall-sparkle {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #f5d78e;
+            box-shadow: 0 0 10px rgba(245, 215, 142, 0.95), 0 0 2px #fff;
+        }
+        .fall-sparkle.is-star {
+            width: auto;
+            height: auto;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            color: #eab308;
+            font-size: 0.85rem;
+            text-shadow: 0 0 8px rgba(234, 179, 8, 0.55);
+            line-height: 1;
+        }
         @@keyframes invFall {
             0% {
                 transform: translate3d(0, -10vh, 0) rotate(0deg);
@@ -607,13 +974,20 @@
         }
     </style>
 </head>
-<body class="inv-loading">
+<body class="inv-loading" data-effect="@Model.EffectStyle" data-lang="en">
+    @if (hasKhText)
+    {
+        <div class="inv-lang" id="invLang" role="group" aria-label="Language">
+            <button type="button" data-lang="en" class="is-active">EN</button>
+            <button type="button" data-lang="kh">ខ្មែរ</button>
+        </div>
+    }
     <div class="inv-loader" id="invLoader" aria-live="polite">
         <div class="inv-loader-title">@title</div>
         <!-- <div class="inv-loader-sub">Loading invitation</div> -->
     </div>
     <div id="heartBg" aria-hidden="true"></div>
-    <div id="heartSnow" aria-hidden="true"></div>
+    <div id="heartSnow" aria-hidden="true" data-effect="@Model.EffectStyle"></div>
     <svg id="heartPathSvg" viewBox="0 0 600 552" aria-hidden="true">
         <path id="heartPath" d="M300,107.77C284.68,55.67,239.76,0,162.31,0,64.83,0,0,82.08,0,171.71c0,.48,0,.95,0,1.43-.52,19.5,0,217.94,299.87,379.69v0l0,0,.05,0,0,0,0,0v0C600,391.08,600.48,192.64,600,173.14c0-.48,0-.95,0-1.43C600,82.08,535.17,0,437.69,0,360.24,0,315.32,55.67,300,107.77" fill="#ee5282"></path>
     </svg>
@@ -625,7 +999,11 @@
                 <img class="inv-cover" src="@(Model.CoverImageUrl ?? image)" alt="@title" />
             }
             <div class="inv-body">
-                <div class="inv-badge">@(Model.IsPublished ? "You're invited" : "Draft preview")</div>
+                <div class="inv-badge i18n"
+                     data-en="@(Model.IsPublished ? "You're invited" : "Draft preview")"
+                     data-kh="@(Model.IsPublished ? "អ្នកត្រូវបានអញ្ជើញ" : "មើលសេចក្តីព្រាង")">
+                    @(Model.IsPublished ? "You're invited" : "Draft preview")
+                </div>
                 <h1>@title</h1>
                 @if (wedding is not null)
                 {
@@ -641,37 +1019,137 @@
                         }
                     </p>
                 }
-                @if (!string.IsNullOrWhiteSpace(Model.WelcomeMessage))
+                @if (!string.IsNullOrWhiteSpace(Model.WelcomeMessage) || !string.IsNullOrWhiteSpace(Model.WelcomeMessageKh))
                 {
-                    <p class="inv-msg">@Model.WelcomeMessage</p>
+                    <p class="inv-msg i18n"
+                       data-en="@Pick(Model.WelcomeMessage, Model.WelcomeMessageKh)"
+                       data-kh="@Pick(Model.WelcomeMessageKh, Model.WelcomeMessage)">@Pick(Model.WelcomeMessage, Model.WelcomeMessageKh)</p>
                 }
-                @if (!string.IsNullOrWhiteSpace(Model.InviteMessage))
+                @if (!string.IsNullOrWhiteSpace(Model.InviteMessage) || !string.IsNullOrWhiteSpace(Model.InviteMessageKh))
                 {
-                    <p class="inv-msg">@Model.InviteMessage</p>
+                    <p class="inv-msg i18n"
+                       data-en="@Pick(Model.InviteMessage, Model.InviteMessageKh)"
+                       data-kh="@Pick(Model.InviteMessageKh, Model.InviteMessage)">@Pick(Model.InviteMessage, Model.InviteMessageKh)</p>
                 }
             </div>
         </article>
+
+        @if (wedding is not null)
+        {
+            <section class="inv-section" id="countdown">
+                <h2 class="i18n" data-en="Counting down" data-kh="រាប់ថយក្រោយ">Counting down</h2>
+                <div class="countdown-grid" id="countdownGrid"
+                     data-wedding-date="@wedding.WeddingDate.ToString("yyyy-MM-dd")"
+                     hidden>
+                    <div class="countdown-box"><strong data-cd="days">0</strong><span class="i18n" data-en="Days" data-kh="ថ្ងៃ">Days</span></div>
+                    <div class="countdown-box"><strong data-cd="hours">0</strong><span class="i18n" data-en="Hours" data-kh="ម៉ោង">Hours</span></div>
+                    <div class="countdown-box"><strong data-cd="mins">0</strong><span class="i18n" data-en="Mins" data-kh="នាទី">Mins</span></div>
+                    <div class="countdown-box"><strong data-cd="secs">0</strong><span class="i18n" data-en="Secs" data-kh="វិនាទី">Secs</span></div>
+                </div>
+                <p class="countdown-done i18n" id="countdownDone" hidden
+                   data-en="Today is the day — celebrate with us!"
+                   data-kh="ថ្ងៃនេះជាថ្ងៃពិសេស — សូមអបអរជាមួយយើង!">Today is the day — celebrate with us!</p>
+                <div class="share-row" style="margin-top:1rem;">
+                    <button type="button" class="share-btn primary i18n" id="addToCalendarBtn"
+                            data-title="@title"
+                            data-date="@wedding.WeddingDate.ToString("yyyy-MM-dd")"
+                            data-venue="@($"{wedding.VenueName}{(string.IsNullOrWhiteSpace(wedding.VenueLocation) ? "" : ", " + wedding.VenueLocation)}")"
+                            data-desc="@description"
+                            data-en="Add to calendar"
+                            data-kh="បញ្ចូលក្នុងប្រតិទិន">
+                        Add to calendar
+                    </button>
+                    <a class="share-btn i18n" href="#rsvp" data-en="RSVP now" data-kh="ផ្ញើ RSVP">RSVP now</a>
+                </div>
+            </section>
+        }
+
+        @if (hasDress || hasSchedule)
+        {
+            var scheduleEn = (Model.ScheduleText ?? Model.ScheduleTextKh ?? "")
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var scheduleKh = (Model.ScheduleTextKh ?? Model.ScheduleText ?? "")
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            <div class="inv-info-pair">
+                @if (hasDress)
+                {
+                    <section class="inv-section" id="dress-code">
+                        <h2 class="i18n" data-en="Dress code" data-kh="សម្លៀកបំពាក់">Dress code</h2>
+                        <p class="dress-code-text i18n inv-kh-font"
+                           data-en="@Pick(Model.DressCode, Model.DressCodeKh)"
+                           data-kh="@Pick(Model.DressCodeKh, Model.DressCode)">@Pick(Model.DressCode, Model.DressCodeKh)</p>
+                    </section>
+                }
+                @if (hasSchedule)
+                {
+                    <section class="inv-section" id="schedule">
+                        <h2 class="i18n" data-en="Schedule" data-kh="កាលវិភាគ">Schedule</h2>
+                        <ul class="schedule-list lang-panel lang-en">
+                            @foreach (var line in scheduleEn)
+                            {
+                                var parts = System.Text.RegularExpressions.Regex.Split(line, @"\s*(?:--|—|–)\s*");
+                                var time = parts.Length > 1 ? parts[0].Trim() : null;
+                                var evt = parts.Length > 1 ? string.Join(" — ", parts.Skip(1)).Trim() : line;
+                                <li>
+                                    @if (!string.IsNullOrWhiteSpace(time))
+                                    {
+                                        <span class="schedule-time">@time</span>
+                                        <span class="schedule-event">@evt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="schedule-event">@line</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                        <ul class="schedule-list lang-panel lang-kh" hidden>
+                            @foreach (var line in scheduleKh)
+                            {
+                                var parts = System.Text.RegularExpressions.Regex.Split(line, @"\s*(?:--|—|–)\s*");
+                                var time = parts.Length > 1 ? parts[0].Trim() : null;
+                                var evt = parts.Length > 1 ? string.Join(" — ", parts.Skip(1)).Trim() : line;
+                                <li class="inv-kh-font">
+                                    @if (!string.IsNullOrWhiteSpace(time))
+                                    {
+                                        <span class="schedule-time">@time</span>
+                                        <span class="schedule-event">@evt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="schedule-event">@line</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </section>
+                }
+            </div>
+        }
 
         @if (Model.GalleryPhotos.Any())
         {
             var galleryList = Model.GalleryPhotos.ToList();
             <section class="inv-section" id="gallery">
-                <h2>Gallery</h2>
-                <div class="gallery-carousel" data-carousel data-slide=".gallery-slide">
-                    <div class="gallery-slides">
+                <h2 class="i18n" data-en="Gallery" data-kh="រូបភាព">Gallery</h2>
+                <div class="gallery-3d" id="gallery3d" data-autoplay="4000">
+                    <div class="gallery-3d-stage" data-gallery-stage>
                         @for (var i = 0; i < galleryList.Count; i++)
                         {
                             var p = galleryList[i];
-                            <figure class="gallery-slide @(i == 0 ? "active" : "")">
-                                <img src="@p.FilePath" alt="@p.Label" />
-                                <figcaption>@p.Label</figcaption>
+                            <figure class="gallery-3d-card @(i == 0 ? "is-active" : "")"
+                                    data-index="@i"
+                                    data-label="@(string.IsNullOrWhiteSpace(p.Label) ? $"Photo {i + 1}" : p.Label)">
+                                <img src="@p.FilePath" alt="@(string.IsNullOrWhiteSpace(p.Label) ? $"Photo {i + 1}" : p.Label)" loading="@(i == 0 ? "eager" : "lazy")" />
                             </figure>
                         }
                     </div>
+                    <p class="gallery-3d-caption" data-gallery-caption>@(string.IsNullOrWhiteSpace(galleryList[0].Label) ? "Photo 1" : galleryList[0].Label)</p>
                     <div class="inv-carousel-controls">
-                        <button type="button" data-carousel-prev aria-label="Previous photo">‹ Prev</button>
-                        <span class="inv-carousel-counter" data-carousel-counter>1 / @galleryList.Count</span>
-                        <button type="button" data-carousel-next aria-label="Next photo">Next ›</button>
+                        <button type="button" data-gallery-prev aria-label="Previous photo">‹ Prev</button>
+                        <span class="inv-carousel-counter" data-gallery-counter>1 / @galleryList.Count</span>
+                        <button type="button" data-gallery-next aria-label="Next photo">Next ›</button>
                     </div>
                 </div>
             </section>
@@ -681,7 +1159,7 @@
         {
             var qrList = Model.BankQrs.ToList();
             <section class="inv-section" id="bank-qr">
-                <h2>Bank transfer QR</h2>
+                <h2 class="i18n" data-en="Bank transfer QR" data-kh="QR ផ្ទេរប្រាក់">Bank transfer QR</h2>
                 <div class="qr-carousel" data-carousel data-slide=".qr-slide" data-has-download="true">
                     <div class="qr-slides">
                         @for (var i = 0; i < qrList.Count; i++)
@@ -707,19 +1185,20 @@
         @if (Model.ShowMap && !string.IsNullOrWhiteSpace(mapQuery))
         {
             <section class="inv-section" id="map">
-                <h2>Venue map</h2>
+                <h2 class="i18n" data-en="Venue map" data-kh="ផែនទីទីកន្លែង">Venue map</h2>
                 <iframe class="map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                         src="https://maps.google.com/maps?q=@mapQuery&z=15&output=embed"
                         title="Venue map"></iframe>
                 <p style="margin:.5rem 0 0;">
-                    <a class="inv-btn" style="padding:.45rem 1rem;font-size:.9rem;" href="https://www.google.com/maps/search/?api=1&query=@mapQuery" target="_blank" rel="noopener">Open in Google Maps</a>
+                    <a class="inv-btn i18n" style="padding:.45rem 1rem;font-size:.9rem;" href="https://www.google.com/maps/search/?api=1&query=@mapQuery" target="_blank" rel="noopener"
+                       data-en="Open in Google Maps" data-kh="បើកក្នុង Google Maps">Open in Google Maps</a>
                 </p>
             </section>
         }
         else if (!Model.ShowMap && wedding is not null && !string.IsNullOrWhiteSpace(wedding.VenueName))
         {
             <section class="inv-section" id="map">
-                <h2>Venue</h2>
+                <h2 class="i18n" data-en="Venue" data-kh="ទីកន្លែង">Venue</h2>
                 <p class="inv-meta">@wedding.VenueName@(string.IsNullOrWhiteSpace(wedding.VenueLocation) ? "" : $", {wedding.VenueLocation}")</p>
             </section>
         }
@@ -727,15 +1206,24 @@
         @if (!string.IsNullOrWhiteSpace(Model.MusicUrl))
         {
             <section class="inv-section" id="music">
-                <h2>Music</h2>
+                <h2 class="i18n" data-en="Music" data-kh="តន្ត្រី">Music</h2>
                 <div class="music-box">
                     @if (spotifyEmbed is not null)
                     {
-                        <iframe src="@spotifyEmbed" allow="encrypted-media" loading="lazy"></iframe>
+                        <iframe id="spotifyPlayer"
+                                src="@spotifyEmbed"
+                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                loading="eager"
+                                title="Wedding music"></iframe>
+                        <p class="inv-meta i18n" style="margin:.55rem 0 0;font-size:.85rem;"
+                           data-en="Music autoplays when your browser allows it. Tap ♪ if it is quiet."
+                           data-kh="តន្ត្រីចាក់ស្វ័យប្រវត្តិ ប្រសិនបើកម្មវិធីអនុញ្ញាត។ ចុច ♪ បើស្ងាត់។">Music autoplays when your browser allows it. Tap ♪ if it is quiet.</p>
                     }
                     else
                     {
-                        <a class="inv-btn" href="@Model.MusicUrl" target="_blank" rel="noopener">Listen</a>
+                        <audio id="inviteAudio" src="@Model.MusicUrl" preload="auto" playsinline loop></audio>
+                        <a class="inv-btn i18n" href="@Model.MusicUrl" target="_blank" rel="noopener" id="musicListenLink"
+                           data-en="Listen" data-kh="ស្តាប់">Listen</a>
                     }
                 </div>
             </section>
@@ -763,78 +1251,154 @@
                 {
                     <div class="rsvp-banner error">@rsvpErr</div>
                 }
-                <label class="field-label" for="rsvpName">Your name</label>
+                <label class="field-label i18n" for="rsvpName" data-en="Your name" data-kh="ឈ្មោះរបស់អ្នក">Your name</label>
                 <input id="rsvpName" name="fullName" type="text" required maxlength="150" autocomplete="name" />
 
-                <label class="field-label" for="rsvpEmail">Email (optional)</label>
+                <label class="field-label i18n" for="rsvpEmail" data-en="Email (optional)" data-kh="អ៊ីមែល (ស្រេចចិត្ត)">Email (optional)</label>
                 <input id="rsvpEmail" name="email" type="email" maxlength="150" autocomplete="email" />
 
-                <label class="field-label">Your reply</label>
+                <label class="field-label i18n" data-en="Your reply" data-kh="ចម្លើយរបស់អ្នក">Your reply</label>
                 <div class="rsvp-options">
                     <label class="rsvp-option">
-                        <input type="radio" name="reply" value="Accepted" checked /> Joyfully accepts
+                        <input type="radio" name="reply" value="Accepted" checked />
+                        <span class="i18n" data-en="Joyfully accepts" data-kh="សូមទទួលយ៉ាងរីករាយ">Joyfully accepts</span>
                     </label>
                     <label class="rsvp-option">
-                        <input type="radio" name="reply" value="Declined" /> Regretfully declines
+                        <input type="radio" name="reply" value="Declined" />
+                        <span class="i18n" data-en="Regretfully declines" data-kh="សូមអធ្យាស្រ័យ ទទួលមិនបាន">Regretfully declines</span>
                     </label>
                     <label class="rsvp-option">
-                        <input type="radio" name="reply" value="Maybe" /> Not sure yet
+                        <input type="radio" name="reply" value="Maybe" />
+                        <span class="i18n" data-en="Not sure yet" data-kh="មិនទាន់ប្រាកដ">Not sure yet</span>
                     </label>
                 </div>
 
-                <label class="field-label" for="rsvpMessage">Message (optional)</label>
+                <label class="field-label i18n" for="rsvpMessage" data-en="Message (optional)" data-kh="សារ (ស្រេចចិត្ត)">Message (optional)</label>
                 <textarea id="rsvpMessage" name="message" rows="3" maxlength="1000"></textarea>
 
-                <label class="field-label" for="rsvpDiet">Dietary notes (optional)</label>
+                <label class="field-label i18n" for="rsvpDiet" data-en="Dietary notes (optional)" data-kh="ចំណាំអាហារ (ស្រេចចិត្ត)">Dietary notes (optional)</label>
                 <input id="rsvpDiet" name="dietaryNotes" type="text" maxlength="300" />
 
-                <button class="inv-btn rsvp-submit" type="submit">Send RSVP</button>
+                <button class="inv-btn rsvp-submit i18n" type="submit" data-en="Send RSVP" data-kh="ផ្ញើ RSVP">Send RSVP</button>
             </form>
         </section>
 
-        @if (Model.GalleryPhotos.Any())
-        {
-            var footerPhotos = Model.GalleryPhotos.OrderBy(p => p.SortOrder).Take(8).ToList();
-            <footer class="inv-section inv-footer-gallery" id="moments">
-                <h2>Our moments</h2>
-                <div class="octagon-grid">
-                    @foreach (var p in footerPhotos)
-                    {
-                        <div class="octagon-item">
-                            <div class="octagon-frame">
-                                <img src="@p.FilePath" alt="@p.Label" loading="lazy" />
-                            </div>
-                        </div>
-                    }
-                </div>
-            </footer>
-        }
+        <section class="inv-section" id="share">
+            <h2 class="i18n" data-en="Share invite" data-kh="ចែករំលែកការអញ្ជើញ">Share invite</h2>
+            <p class="inv-meta i18n" style="margin-top:0;"
+               data-en="Send this page to family and friends."
+               data-kh="ផ្ញើទំព័រនេះទៅក្រុមគ្រួសារ និងមិត្តភក្តិ។">Send this page to family and friends.</p>
+            <div class="share-row">
+                <button type="button" class="share-btn primary i18n" id="copyInviteBtn" data-url="@pageUrl"
+                        data-en="Copy link" data-kh="ចម្លងតំណ">Copy link</button>
+                <a class="share-btn" target="_blank" rel="noopener"
+                   href="https://t.me/share/url?url=@Uri.EscapeDataString(pageUrl)&text=@Uri.EscapeDataString(title)">Telegram</a>
+                <a class="share-btn" target="_blank" rel="noopener"
+                   href="https://wa.me/?text=@Uri.EscapeDataString($"{title} — {pageUrl}")">WhatsApp</a>
+                <a class="share-btn" target="_blank" rel="noopener"
+                   href="https://www.facebook.com/sharer/sharer.php?u=@Uri.EscapeDataString(pageUrl)">Facebook</a>
+            </div>
+            <p class="share-hint" id="shareHint"></p>
+        </section>
+
+        <footer class="inv-thanks" id="thanks">
+            <p class="inv-thanks-title i18n" data-en="Thank you" data-kh="អរគុណ">Thank you</p>
+            <p class="inv-thanks-text i18n"
+               data-en="We are so grateful to celebrate with you@(wedding is not null ? $" — with love, {wedding.CoupleDisplayName}" : ".")"
+               data-kh="យើងរីករាយណាស់ដែលបានប្រារព្ធជាមួយអ្នក@(wedding is not null ? $" — ដោយសេចក្តីស្រលាញ់ {wedding.CoupleDisplayName}" : "។")">
+                We are so grateful to celebrate with you
+                @if (wedding is not null)
+                {
+                    <text> — with love, <strong>@wedding.CoupleDisplayName</strong></text>
+                }
+                else
+                {
+                    <text>.</text>
+                }
+            </p>
+        </footer>
     </div>
 
     <nav class="inv-dock" aria-label="Quick links">
-        <a class="inv-dock-home" href="#home">Home</a>
+        <a class="inv-dock-home i18n" href="#home" data-en="Home" data-kh="ដើម">Home</a>
+        @if (wedding is not null)
+        {
+            <a class="inv-dock-countdown i18n" href="#countdown" data-en="Countdown" data-kh="រាប់ថយ">Countdown</a>
+        }
+        @if (hasDress)
+        {
+            <a class="inv-dock-info i18n" href="#dress-code" data-en="Dress" data-kh="សម្លៀក">Dress</a>
+        }
+        @if (hasSchedule)
+        {
+            <a class="inv-dock-info i18n" href="#schedule" data-en="Schedule" data-kh="កាលវិភាគ">Schedule</a>
+        }
         @if (Model.GalleryPhotos.Any())
         {
-            <a class="inv-dock-gallery" href="#gallery">Gallery</a>
+            <a class="inv-dock-gallery i18n" href="#gallery" data-en="Gallery" data-kh="រូប">Gallery</a>
         }
         @if (Model.BankQrs.Any())
         {
-            <a class="inv-dock-bank" href="#bank-qr">Bank QR</a>
+            <a class="inv-dock-bank i18n" href="#bank-qr" data-en="Bank QR" data-kh="QR ធនាគារ">Bank QR</a>
         }
         @if ((Model.ShowMap && !string.IsNullOrWhiteSpace(mapQuery)) ||
              (!Model.ShowMap && wedding is not null && !string.IsNullOrWhiteSpace(wedding.VenueName)))
         {
-            <a class="inv-dock-map" href="#map">Map</a>
+            <a class="inv-dock-map i18n" href="#map" data-en="Map" data-kh="ផែនទី">Map</a>
         }
         @if (!string.IsNullOrWhiteSpace(Model.MusicUrl))
         {
-            <a class="inv-dock-music" href="#music">Music</a>
+            <a class="inv-dock-music i18n" href="#music" data-en="Music" data-kh="តន្ត្រី">Music</a>
         }
         <a class="inv-dock-rsvp" href="#rsvp">RSVP</a>
+        <a class="inv-dock-share i18n" href="#share" data-en="Share" data-kh="ចែករំលែក">Share</a>
     </nav>
+
+    @if (hasMusic)
+    {
+        <div class="music-float-tip is-on" id="musicTip">Tap for music</div>
+        <button type="button" class="music-float" id="musicFloatBtn" aria-label="Play music">♪</button>
+    }
+    <button type="button" class="scroll-top" id="scrollTopBtn" aria-label="Back to top">↑</button>
 
     <script>
         (function () {
+            var body = document.body;
+            var langBar = document.getElementById('invLang');
+            function setLang(lang) {
+                lang = lang === 'kh' ? 'kh' : 'en';
+                body.setAttribute('data-lang', lang);
+                body.classList.toggle('lang-kh', lang === 'kh');
+                document.querySelectorAll('.i18n').forEach(function (el) {
+                    var text = el.getAttribute(lang === 'kh' ? 'data-kh' : 'data-en');
+                    if (text == null || text === '') {
+                        text = el.getAttribute('data-en') || el.getAttribute('data-kh');
+                    }
+                    if (text != null && text !== '') el.textContent = text;
+                });
+                document.querySelectorAll('.lang-panel.lang-en').forEach(function (el) {
+                    el.hidden = lang === 'kh';
+                });
+                document.querySelectorAll('.lang-panel.lang-kh').forEach(function (el) {
+                    el.hidden = lang !== 'kh';
+                });
+                if (langBar) {
+                    langBar.querySelectorAll('button').forEach(function (btn) {
+                        btn.classList.toggle('is-active', btn.getAttribute('data-lang') === lang);
+                    });
+                }
+                try { localStorage.setItem('invite-lang', lang); } catch (e) { /* ignore */ }
+            }
+            if (langBar) {
+                langBar.querySelectorAll('button').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        setLang(btn.getAttribute('data-lang'));
+                    });
+                });
+                // Always open in English first
+                setLang('en');
+            }
+
             function initCarousel(root) {
                 var slideSel = root.getAttribute('data-slide') || '.qr-slide';
                 var slides = Array.prototype.slice.call(root.querySelectorAll(slideSel));
@@ -860,8 +1424,35 @@
                     if (nextBtn) nextBtn.disabled = slides.length <= 1;
                 }
 
-                if (prevBtn) prevBtn.addEventListener('click', function () { show(i - 1); });
-                if (nextBtn) nextBtn.addEventListener('click', function () { show(i + 1); });
+                var autoMs = parseInt(root.getAttribute('data-autoplay') || '0', 10);
+                var timer = null;
+                var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+                function stopAuto() {
+                    if (timer) {
+                        clearInterval(timer);
+                        timer = null;
+                    }
+                }
+
+                function startAuto() {
+                    stopAuto();
+                    if (!autoMs || autoMs < 1000 || slides.length <= 1 || reduceMotion) return;
+                    timer = setInterval(function () { show(i + 1); }, autoMs);
+                }
+
+                function go(n) {
+                    show(n);
+                    startAuto();
+                }
+
+                if (prevBtn) prevBtn.addEventListener('click', function () { go(i - 1); });
+                if (nextBtn) nextBtn.addEventListener('click', function () { go(i + 1); });
+
+                root.addEventListener('mouseenter', stopAuto);
+                root.addEventListener('mouseleave', startAuto);
+                root.addEventListener('focusin', stopAuto);
+                root.addEventListener('focusout', startAuto);
 
                 if (download) {
                     download.addEventListener('click', function (e) {
@@ -887,9 +1478,327 @@
                 }
 
                 show(0);
+                startAuto();
             }
 
             document.querySelectorAll('[data-carousel]').forEach(initCarousel);
+
+            (function initGallery3d() {
+                var root = document.getElementById('gallery3d');
+                if (!root) return;
+                var stage = root.querySelector('[data-gallery-stage]');
+                var cards = Array.prototype.slice.call(root.querySelectorAll('.gallery-3d-card'));
+                if (!stage || !cards.length) return;
+
+                var prevBtn = root.querySelector('[data-gallery-prev]');
+                var nextBtn = root.querySelector('[data-gallery-next]');
+                var counter = root.querySelector('[data-gallery-counter]');
+                var caption = root.querySelector('[data-gallery-caption]');
+                var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                var autoMs = parseInt(root.getAttribute('data-autoplay') || '0', 10);
+                var active = 0;
+                var timer = null;
+                var n = cards.length;
+
+                function wrapOffset(idx) {
+                    var offset = idx - active;
+                    if (n > 1) {
+                        if (offset > n / 2) offset -= n;
+                        if (offset < -n / 2) offset += n;
+                    }
+                    return offset;
+                }
+
+                function layout() {
+                    var isNarrow = window.innerWidth < 560;
+                    var stepX = isNarrow ? 38 : 46;
+                    var stepZ = isNarrow ? 78 : 100;
+                    var stepRot = isNarrow ? 16 : 24;
+
+                    cards.forEach(function (card, idx) {
+                        var offset = wrapOffset(idx);
+                        var abs = Math.abs(offset);
+                        var x = offset * stepX;
+                        var z = -abs * stepZ;
+                        var rotY = reduceMotion ? 0 : (-offset * stepRot);
+                        var scale = Math.max(0.55, 1 - abs * 0.14);
+                        var blur = reduceMotion || abs === 0 ? 0 : Math.min(abs * 2.2, 7);
+                        var opacity = abs > 3 ? 0 : Math.max(0.25, 1 - abs * 0.22);
+
+                        if (reduceMotion) {
+                            card.style.transform = 'translate(-50%, -50%) scale(' + (abs === 0 ? 1 : 0.86) + ')';
+                            card.style.filter = 'none';
+                            card.style.opacity = abs === 0 ? '1' : '0';
+                            card.style.pointerEvents = abs === 0 ? 'auto' : 'none';
+                        } else {
+                            card.style.transform =
+                                'translate(-50%, -50%) translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + rotY + 'deg) scale(' + scale + ')';
+                            card.style.filter = blur ? 'blur(' + blur + 'px)' : 'none';
+                            card.style.opacity = String(opacity);
+                            card.style.pointerEvents = abs <= 2 ? 'auto' : 'none';
+                        }
+
+                        card.style.zIndex = String(100 - Math.round(abs * 10));
+                        card.classList.toggle('is-active', offset === 0);
+                        card.classList.toggle('is-far', abs > 2);
+                        card.setAttribute('aria-hidden', offset === 0 ? 'false' : 'true');
+                    });
+
+                    if (counter) counter.textContent = (active + 1) + ' / ' + n;
+                    if (caption) {
+                        var label = cards[active].getAttribute('data-label') || ('Photo ' + (active + 1));
+                        caption.textContent = label;
+                    }
+                    if (prevBtn) prevBtn.disabled = n <= 1;
+                    if (nextBtn) nextBtn.disabled = n <= 1;
+                }
+
+                function go(delta) {
+                    if (n <= 1) return;
+                    active = (active + delta + n) % n;
+                    layout();
+                    startAuto();
+                }
+
+                function stopAuto() {
+                    if (timer) {
+                        clearInterval(timer);
+                        timer = null;
+                    }
+                }
+
+                function startAuto() {
+                    stopAuto();
+                    if (!autoMs || autoMs < 1000 || n <= 1 || reduceMotion) return;
+                    timer = setInterval(function () { go(1); }, autoMs);
+                }
+
+                if (prevBtn) prevBtn.addEventListener('click', function () { go(-1); });
+                if (nextBtn) nextBtn.addEventListener('click', function () { go(1); });
+
+                cards.forEach(function (card) {
+                    card.addEventListener('click', function () {
+                        var idx = parseInt(card.getAttribute('data-index') || '0', 10);
+                        if (idx === active) return;
+                        active = idx;
+                        layout();
+                        startAuto();
+                    });
+                });
+
+                var touchX = null;
+                stage.addEventListener('touchstart', function (e) {
+                    if (!e.changedTouches || !e.changedTouches.length) return;
+                    touchX = e.changedTouches[0].clientX;
+                    stopAuto();
+                }, { passive: true });
+                stage.addEventListener('touchend', function (e) {
+                    if (touchX == null || !e.changedTouches || !e.changedTouches.length) return;
+                    var dx = e.changedTouches[0].clientX - touchX;
+                    touchX = null;
+                    if (Math.abs(dx) < 36) {
+                        startAuto();
+                        return;
+                    }
+                    go(dx < 0 ? 1 : -1);
+                }, { passive: true });
+
+                root.addEventListener('mouseenter', stopAuto);
+                root.addEventListener('mouseleave', startAuto);
+                window.addEventListener('resize', layout);
+
+                layout();
+                startAuto();
+            })();
+
+            // Back to top
+            (function () {
+                var btn = document.getElementById('scrollTopBtn');
+                if (!btn) return;
+                function sync() {
+                    btn.classList.toggle('is-on', window.scrollY > 420);
+                }
+                window.addEventListener('scroll', sync, { passive: true });
+                btn.addEventListener('click', function () {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+                sync();
+            })();
+
+            // Music autoplay (browsers often need one tap)
+            (function () {
+                var iframe = document.getElementById('spotifyPlayer');
+                var audio = document.getElementById('inviteAudio');
+                var btn = document.getElementById('musicFloatBtn');
+                var tip = document.getElementById('musicTip');
+                if (!iframe && !audio) return;
+
+                var started = false;
+
+                function hideTip() {
+                    if (tip) tip.classList.remove('is-on');
+                }
+
+                function startSpotify() {
+                    if (!iframe || started) return;
+                    started = true;
+                    hideTip();
+                    if (btn) btn.classList.add('is-playing');
+                    var src = iframe.getAttribute('src') || '';
+                    if (src.indexOf('autoplay=1') === -1) {
+                        src += (src.indexOf('?') >= 0 ? '&' : '?') + 'autoplay=1';
+                    }
+                    // Reload embed after a user gesture so autoplay is more likely to work
+                    iframe.src = src;
+                }
+
+                function startAudio() {
+                    if (!audio || started) return;
+                    audio.play().then(function () {
+                        started = true;
+                        hideTip();
+                        if (btn) btn.classList.add('is-playing');
+                    }).catch(function () { /* wait for tap */ });
+                }
+
+                function tryPlay() {
+                    if (iframe) startSpotify();
+                    else startAudio();
+                }
+
+                if (btn) {
+                    btn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        if (iframe) {
+                            started = false;
+                            startSpotify();
+                        } else if (audio) {
+                            if (!audio.paused) {
+                                audio.pause();
+                                btn.classList.remove('is-playing');
+                                started = false;
+                            } else {
+                                started = false;
+                                startAudio();
+                            }
+                        }
+                    });
+                }
+
+                // After loading screen, first tap anywhere can unlock music
+                function onFirstGesture() {
+                    tryPlay();
+                    document.removeEventListener('pointerdown', onFirstGesture);
+                    document.removeEventListener('keydown', onFirstGesture);
+                }
+                document.addEventListener('pointerdown', onFirstGesture, { once: true });
+                document.addEventListener('keydown', onFirstGesture, { once: true });
+
+                // Try once the invite is revealed (may still be blocked without gesture)
+                var watch = setInterval(function () {
+                    if (!document.body.classList.contains('inv-ready')) return;
+                    clearInterval(watch);
+                    setTimeout(function () {
+                        if (audio) startAudio();
+                        // Spotify still needs gesture in most browsers; tip stays visible
+                    }, 400);
+                }, 200);
+            })();
+
+            // Countdown
+            (function () {
+                var grid = document.getElementById('countdownGrid');
+                var done = document.getElementById('countdownDone');
+                if (!grid) return;
+                var dateStr = grid.getAttribute('data-wedding-date');
+                if (!dateStr) return;
+                var target = new Date(dateStr + 'T00:00:00');
+                var daysEl = grid.querySelector('[data-cd="days"]');
+                var hoursEl = grid.querySelector('[data-cd="hours"]');
+                var minsEl = grid.querySelector('[data-cd="mins"]');
+                var secsEl = grid.querySelector('[data-cd="secs"]');
+
+                function tick() {
+                    var now = new Date();
+                    var diff = target.getTime() - now.getTime();
+                    if (diff <= 0) {
+                        grid.hidden = true;
+                        if (done) done.hidden = false;
+                        return;
+                    }
+                    grid.hidden = false;
+                    if (done) done.hidden = true;
+                    var secs = Math.floor(diff / 1000);
+                    var days = Math.floor(secs / 86400);
+                    secs -= days * 86400;
+                    var hours = Math.floor(secs / 3600);
+                    secs -= hours * 3600;
+                    var mins = Math.floor(secs / 60);
+                    secs -= mins * 60;
+                    if (daysEl) daysEl.textContent = String(days);
+                    if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+                    if (minsEl) minsEl.textContent = String(mins).padStart(2, '0');
+                    if (secsEl) secsEl.textContent = String(secs).padStart(2, '0');
+                }
+                tick();
+                setInterval(tick, 1000);
+            })();
+
+            // Add to calendar (.ics)
+            (function () {
+                var btn = document.getElementById('addToCalendarBtn');
+                if (!btn) return;
+                btn.addEventListener('click', function () {
+                    var title = btn.getAttribute('data-title') || 'Wedding';
+                    var date = (btn.getAttribute('data-date') || '').replace(/-/g, '');
+                    var venue = btn.getAttribute('data-venue') || '';
+                    var desc = btn.getAttribute('data-desc') || '';
+                    if (!date) return;
+                    var ics = [
+                        'BEGIN:VCALENDAR',
+                        'VERSION:2.0',
+                        'PRODID:-//Wedding Invite//EN',
+                        'BEGIN:VEVENT',
+                        'DTSTART;VALUE=DATE:' + date,
+                        'DTEND;VALUE=DATE:' + date,
+                        'SUMMARY:' + title.replace(/\n/g, ' '),
+                        'DESCRIPTION:' + desc.replace(/\n/g, ' '),
+                        'LOCATION:' + venue.replace(/\n/g, ' '),
+                        'END:VEVENT',
+                        'END:VCALENDAR'
+                    ].join('\r\n');
+                    var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'wedding.ics';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                });
+            })();
+
+            // Copy invite link
+            (function () {
+                var btn = document.getElementById('copyInviteBtn');
+                var hint = document.getElementById('shareHint');
+                if (!btn) return;
+                btn.addEventListener('click', function () {
+                    var url = btn.getAttribute('data-url') || location.href;
+                    function ok() {
+                        if (hint) hint.textContent = 'Link copied!';
+                        setTimeout(function () { if (hint) hint.textContent = ''; }, 2500);
+                    }
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(url).then(ok).catch(function () {
+                            window.prompt('Copy this link:', url);
+                        });
+                    } else {
+                        window.prompt('Copy this link:', url);
+                    }
+                });
+            })();
 
             // Scroll reveal — animate in when entering viewport, out when leaving
             var revealEls = document.querySelectorAll('.inv-hero, .inv-section, .octagon-item');
@@ -939,35 +1848,77 @@
             var body = document.body;
             var loader = document.getElementById('invLoader');
             var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var effectStyle = parseInt(body.getAttribute('data-effect') || '0', 10);
 
             var finished = false;
             var snowStarted = false;
 
-            function startHeartSnow() {
+            var effectPalette = {
+                0: { color: 0xee5282, size: 3 },
+                1: { color: 0xee5282, size: 3 },
+                2: { color: 0xf4729b, size: 3.2 },
+                3: { color: 0xe8f1ff, size: 2.6 },
+                4: { color: 0xe11d48, size: 3.1 },
+                5: { color: 0xf5d78e, size: 2.8 }
+            };
+            var palette = effectPalette[effectStyle] || effectPalette[1];
+
+            function startInviteEffect() {
                 if (snowStarted) return;
                 snowStarted = true;
                 var layer = document.getElementById('heartSnow');
                 if (!layer || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+                var effect = parseInt(layer.getAttribute('data-effect') || body.getAttribute('data-effect') || '0', 10);
+                if (!effect || effect === 0) {
+                    layer.classList.remove('has-effect');
+                    layer.innerHTML = '';
+                    return;
+                }
+
+                layer.classList.add('has-effect');
                 var count = window.innerWidth < 700 ? 28 : 46;
                 var hearts = ['♥', '❤', '❥'];
                 layer.innerHTML = '';
 
                 for (var n = 0; n < count; n++) {
                     var el = document.createElement('span');
-                    var isHeart = Math.random() > 0.38;
-                    el.className = 'fall-item ' + (isHeart ? 'fall-heart' : 'fall-snow');
+                    var kind = 'snow';
 
-                    if (isHeart) {
+                    if (effect === 1) kind = Math.random() > 0.38 ? 'heart' : 'snow';
+                    else if (effect === 2) kind = 'heart';
+                    else if (effect === 3) kind = 'snow';
+                    else if (effect === 4) kind = 'petal';
+                    else if (effect === 5) kind = Math.random() > 0.45 ? 'sparkle' : 'star';
+
+                    if (kind === 'heart') {
+                        el.className = 'fall-item fall-heart';
                         el.textContent = hearts[n % hearts.length];
                         el.style.fontSize = (0.7 + Math.random() * 1.1) + 'rem';
                         if (Math.random() > 0.55) el.classList.add('is-soft');
                         else if (Math.random() > 0.7) el.classList.add('is-deep');
+                    } else if (kind === 'petal') {
+                        el.className = 'fall-item fall-petal';
+                        if (Math.random() > 0.5) el.classList.add('is-soft');
+                        var size = 10 + Math.random() * 10;
+                        el.style.width = size + 'px';
+                        el.style.height = (size * 1.25) + 'px';
+                    } else if (kind === 'sparkle' || kind === 'star') {
+                        el.className = 'fall-item fall-sparkle' + (kind === 'star' ? ' is-star' : '');
+                        if (kind === 'star') {
+                            el.textContent = '✦';
+                            el.style.fontSize = (0.55 + Math.random() * 0.7) + 'rem';
+                        } else {
+                            var spark = 3 + Math.random() * 5;
+                            el.style.width = spark + 'px';
+                            el.style.height = spark + 'px';
+                        }
                     } else {
+                        el.className = 'fall-item fall-snow';
                         var flake = 3 + Math.random() * 6;
                         el.style.width = flake + 'px';
                         el.style.height = flake + 'px';
-                        if (Math.random() > 0.5) el.classList.add('is-pink');
+                        if (effect === 1 && Math.random() > 0.5) el.classList.add('is-pink');
                     }
 
                     el.style.left = (Math.random() * 100) + 'vw';
@@ -986,7 +1937,12 @@
                 if (loader) loader.classList.add('is-done');
                 body.classList.remove('inv-loading');
                 body.classList.add('inv-ready');
-                startHeartSnow();
+                startInviteEffect();
+            }
+
+            // Same falling style as chosen effect — visible during loading too
+            if (!reduceMotion && effectStyle > 0) {
+                startInviteEffect();
             }
 
             if (reduceMotion || typeof THREE === 'undefined' || typeof gsap === 'undefined') {
@@ -1014,23 +1970,24 @@
             var length = path.getTotalLength();
             var step = window.innerWidth < 700 ? 0.45 : 0.18;
             var vertices = [];
+            var jitter = effectStyle === 5 ? 42 : (effectStyle === 3 ? 22 : 30);
 
             for (var i = 0; i < length; i += step) {
                 var point = path.getPointAtLength(i);
                 var vector = new THREE.Vector3(point.x, -point.y, 0);
-                vector.x += (Math.random() - 0.5) * 30;
-                vector.y += (Math.random() - 0.5) * 30;
-                vector.z += (Math.random() - 0.5) * 70;
+                vector.x += (Math.random() - 0.5) * jitter;
+                vector.y += (Math.random() - 0.5) * jitter;
+                vector.z += (Math.random() - 0.5) * (effectStyle === 5 ? 90 : 70);
                 vertices.push(vector);
             }
 
             var geometry = new THREE.BufferGeometry().setFromPoints(vertices);
             var material = new THREE.PointsMaterial({
-                color: 0xee5282,
+                color: palette.color,
                 blending: THREE.AdditiveBlending,
                 transparent: true,
                 depthWrite: false,
-                size: window.innerWidth < 700 ? 2.2 : 3
+                size: (window.innerWidth < 700 ? palette.size * 0.75 : palette.size)
             });
             var particles = new THREE.Points(geometry, material);
             particles.position.x -= 600 / 2;

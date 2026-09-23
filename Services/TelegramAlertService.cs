@@ -15,6 +15,7 @@ public interface ITelegramAlertService
         string? email,
         string? message,
         string? dietaryNotes,
+        int partySize = 1,
         CancellationToken ct = default);
 }
 
@@ -43,6 +44,7 @@ public class TelegramAlertService : ITelegramAlertService
         string? email,
         string? message,
         string? dietaryNotes,
+        int partySize = 1,
         CancellationToken ct = default)
     {
         if (!_options.Enabled ||

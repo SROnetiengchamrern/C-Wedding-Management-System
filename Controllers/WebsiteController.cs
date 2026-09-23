@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -88,6 +89,7 @@ public class WebsiteController : Controller
             ShareDescription = $"You're invited to celebrate with {partner1Name} & {partner2Name}.",
             InviteMessage = "We can't wait to celebrate with you.",
             ThemeLayout = 6,
+            EffectStyle = InviteEffects.HeartsSnow,
             ShowMap = true,
             MapSearch = venueLocation ?? venueName,
             IsPublished = false
@@ -129,7 +131,6 @@ public class WebsiteController : Controller
         ViewBag.Rsvps = await _db.WebsiteRsvps
             .Where(r => r.WeddingId == settings.WeddingId)
             .OrderByDescending(r => r.CreatedAt)
-            .Take(30)
             .ToListAsync();
         return View(settings);
     }
@@ -146,12 +147,18 @@ public class WebsiteController : Controller
         settings.SiteTitle = model.SiteTitle;
         settings.Slug = await EnsureUniqueSlugAsync(NormalizeSlug(model.Slug), settings.Id);
         settings.WelcomeMessage = model.WelcomeMessage;
+        settings.WelcomeMessageKh = model.WelcomeMessageKh;
         settings.RsvpUrl = model.RsvpUrl;
         settings.ShareDescription = model.ShareDescription;
         settings.ThemeLayout = model.ThemeLayout is >= 1 and <= 7 ? model.ThemeLayout : settings.ThemeLayout;
         settings.ShowMap = string.Equals(Request.Form["ShowMap"], "true", StringComparison.OrdinalIgnoreCase);
         settings.MapSearch = model.MapSearch;
         settings.InviteMessage = model.InviteMessage;
+        settings.InviteMessageKh = model.InviteMessageKh;
+        settings.DressCode = model.DressCode;
+        settings.DressCodeKh = model.DressCodeKh;
+        settings.ScheduleText = model.ScheduleText;
+        settings.ScheduleTextKh = model.ScheduleTextKh;
         settings.MusicUrl = model.MusicUrl;
         settings.IsPublished = model.IsPublished;
 
@@ -177,6 +184,89 @@ public class WebsiteController : Controller
         await _db.SaveChangesAsync();
         TempData["Ok"] = "Theme saved.";
         return BackToEdit(settings.WeddingId);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveEffect(int id, int effectStyle)
+    {
+        var settings = await _db.WebsiteSettings.FindAsync(id);
+        if (settings is null) return NotFound();
+        settings.EffectStyle = InviteEffects.IsValid(effectStyle) ? effectStyle : InviteEffects.None;
+        await _db.SaveChangesAsync();
+        TempData["Ok"] = settings.EffectStyle == InviteEffects.None
+            ? "Invite effect turned off."
+            : $"Invite effect saved: {InviteEffects.Get(settings.EffectStyle).Name}.";
+        return BackToEdit(settings.WeddingId);
+    }
+
+    public async Task<IActionResult> ExportRsvpExcel(int weddingId)
+    {
+        var wedding = await _db.Weddings.AsNoTracking().FirstOrDefaultAsync(w => w.Id == weddingId);
+        if (wedding is null) return NotFound();
+
+        var rsvps = await _db.WebsiteRsvps.AsNoTracking()
+            .Where(r => r.WeddingId == weddingId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+        var sb = new StringBuilder();
+        sb.AppendLine("No,Name,Email,Reply,Message,Dietary,When (UTC)");
+        var i = 1;
+        foreach (var r in rsvps)
+        {
+            sb.AppendLine(string.Join(",",
+                i++,
+                Csv(r.FullName),
+                Csv(r.Email),
+                Csv(RsvpReplyLabel(r.Reply)),
+                Csv(r.Message),
+                Csv(r.DietaryNotes),
+                r.CreatedAt.ToString("yyyy-MM-dd HH:mm")));
+        }
+
+        sb.AppendLine();
+        sb.AppendLine($"Accepted,{rsvps.Count(r => r.Reply == RsvpStatus.Accepted)}");
+        sb.AppendLine($"Declined,{rsvps.Count(r => r.Reply == RsvpStatus.Declined)}");
+        sb.AppendLine($"Maybe,{rsvps.Count(r => r.Reply == RsvpStatus.Maybe)}");
+        sb.AppendLine($"Total,{rsvps.Count}");
+
+        var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+        var slug = $"{wedding.Partner1Name}-{wedding.Partner2Name}".ToLowerInvariant().Replace(' ', '-');
+        return File(bytes, "text/csv", $"rsvp-{slug}-{DateTime.Today:yyyyMMdd}.csv");
+    }
+
+    public async Task<IActionResult> ExportRsvpPdf(int weddingId)
+    {
+        var wedding = await _db.Weddings.AsNoTracking().FirstOrDefaultAsync(w => w.Id == weddingId);
+        if (wedding is null) return NotFound();
+
+        var rsvps = await _db.WebsiteRsvps.AsNoTracking()
+            .Where(r => r.WeddingId == weddingId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+        ViewBag.CoupleName = wedding.CoupleDisplayName;
+        ViewBag.WebId = wedding.WebId;
+        ViewBag.Accepted = rsvps.Count(r => r.Reply == RsvpStatus.Accepted);
+        ViewBag.Declined = rsvps.Count(r => r.Reply == RsvpStatus.Declined);
+        ViewBag.Maybe = rsvps.Count(r => r.Reply == RsvpStatus.Maybe);
+        return View(rsvps);
+    }
+
+    private static string RsvpReplyLabel(RsvpStatus reply) => reply switch
+    {
+        RsvpStatus.Accepted => "Joyfully accepts",
+        RsvpStatus.Declined => "Regretfully declines",
+        RsvpStatus.Maybe => "Not sure yet",
+        _ => reply.ToString()
+    };
+
+    private static string Csv(string? value)
+    {
+        value ??= "";
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        return value;
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -394,6 +484,7 @@ public class WebsiteController : Controller
             Reply = reply,
             Message = message is { Length: > 1000 } ? message[..1000] : message,
             DietaryNotes = dietaryNotes is { Length: > 300 } ? dietaryNotes[..300] : dietaryNotes,
+            PartySize = 1,
             CreatedAt = DateTime.UtcNow
         });
 
@@ -485,6 +576,7 @@ public class WebsiteController : Controller
                 ShareDescription = "Join us for our wedding celebration.",
                 InviteMessage = "We can't wait to celebrate with you.",
                 ThemeLayout = 6,
+                EffectStyle = InviteEffects.HeartsSnow,
                 ShowMap = true,
                 IsPublished = false
             };

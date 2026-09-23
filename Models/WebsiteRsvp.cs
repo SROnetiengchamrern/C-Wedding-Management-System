@@ -23,5 +23,8 @@ public class WebsiteRsvp
     [MaxLength(300)]
     public string? DietaryNotes { get; set; }
 
+    /// <summary>Number of people attending with this guest.</summary>
+    public int PartySize { get; set; } = 1;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WeddingManagementSystem.Data;
 
@@ -11,9 +12,11 @@ using WeddingManagementSystem.Data;
 namespace WeddingManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260923035000_AddInviteEffectStyle")]
+    partial class AddInviteEffectStyle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -385,22 +388,10 @@ namespace WeddingManagementSystem.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<string>("DressCode")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("DressCodeKh")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<int>("EffectStyle")
                         .HasColumnType("int");
 
                     b.Property<string>("InviteMessage")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("InviteMessageKh")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
@@ -418,14 +409,6 @@ namespace WeddingManagementSystem.Migrations
                     b.Property<string>("RsvpUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ScheduleText")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("ScheduleTextKh")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("ShareDescription")
                         .HasMaxLength(300)
@@ -454,10 +437,6 @@ namespace WeddingManagementSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("WelcomeMessage")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("WelcomeMessageKh")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 

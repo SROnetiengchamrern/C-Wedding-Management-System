@@ -1299,6 +1299,36 @@ table.data-table .col-actions {
   border-color: #9f1239;
 }
 .map-toggle input { display: none; }
+.effect-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.65rem;
+  margin: 0.75rem 0 1.25rem;
+}
+.effect-option {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+.effect-option.selected {
+  border-color: #9f1239;
+  box-shadow: 0 0 0 2px rgba(159, 18, 57, 0.12);
+  background: #fff7f9;
+}
+.effect-option input { margin-top: 0.2rem; }
+.effect-option strong { display: block; font-size: 0.92rem; }
+.effect-option small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+  line-height: 1.35;
+}
 .map-embed { margin: 0.75rem 0 1rem; }
 .map-embed iframe {
   width: 100%;
@@ -1742,6 +1772,21 @@ table.data-table .col-actions {
 }
 
 /* RSVP replies DataTable (invite admin) */
+.rsvp-export-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin: 0.35rem 0 0.85rem;
+}
+.rsvp-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.9rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.rsvp-counts strong { color: #2c241c; }
 .rsvp-table-wrap {
   margin-top: 0.85rem;
   overflow-x: auto;
